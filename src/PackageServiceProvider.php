@@ -1,4 +1,4 @@
-namespace VendorName\PackageName;
+namespace utomo\codage;
 
 use Illuminate\Support\ServiceProvider;
 
