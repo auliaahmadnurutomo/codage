@@ -1,4 +1,4 @@
-namespace utomo\codage;
+namespace Utomo\Codage;
 
 use Illuminate\Support\ServiceProvider;
 
