@@ -54,6 +54,7 @@ class PackageServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views/setting' => resource_path('views/setting'),
             __DIR__.'/../resources/views/layouts' => resource_path('views/layouts'),
             __DIR__.'/../resources/views/home.blade.php' => resource_path('views/home.blade.php'),
+            __DIR__.'/../resources/views/login.blade.php' => resource_path('views/auth/login.blade.php'),
         ], 'utomo-codage');
     }
 }
