@@ -2,7 +2,7 @@
     "name": "utomo/codage",
     "description": "Simple Reusable for Laravel",
     "type": "library",
-    "license": "Utomo",
+    "license": "proprietary",
     "authors": [
       {
         "name": "Aulia Ahmad Nur Utomo",
