@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Menu_access;
+use App\GenerateMenuSidebar;
 use App\Helpers\Utility;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -303,7 +303,7 @@ class ProtonGenerate extends Command
             'access' => 1
         ];
         DB::table('skeleton_setting_menu_access')->insert($dataInsert);
-        $menu = new Menu_access();
+        $menu = new GenerateMenuSidebar();
         session([
             'menu' => $menu->get_menu_access(1) //id_access
         ]);
