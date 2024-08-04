@@ -22,13 +22,6 @@ Codeton Generator
 ### 8. Set queue connection to database on .env
 `QUEUE_CONNECTION=database`
 
-
-### 9. Migrate Database
-`php artisan migrate`
-
-### 10. Run Laravel
-`php artisan serve`
-
 <hr>
 <br>
 
@@ -42,13 +35,16 @@ Codeton Generator
 ### 3. Force to overwrite to new Version
 `php artisan vendor:publish --tag=utomo-codage --force`
 
-### 4. Add command to app>Console>Kernel
+### 4. Migrate Database
+`php artisan migrate`
+
+### 5. Add command to app>Console>Kernel
 
     protected $commands = [
         Commands\ProtonGenerate::class,
     ];
 
-### 5. Use Bootstrap Pagination on app>Providers>AppServiceProvider
+### 6. Use Bootstrap Pagination on app>Providers>AppServiceProvider
     use Illuminate\Pagination\Paginator;
 
     public function boot(): void
@@ -57,8 +53,12 @@ Codeton Generator
         Paginator::useBootstrap();
     }
 
-### 6. Include default route to routes>web.php
+### 7. Include default route to routes>web.php
     require __DIR__.'/default.php';
 
-### 6. How to Generate Code
+### 8. Run Laravel
+`php artisan serve`
+
+
+### 9. How to Generate Code
 For generate codage skeleton, please refer to [Codefio](https://codefio.gitbook.io/codeton)
