@@ -87,7 +87,7 @@ class SettingMenuAccessListView extends SettingMenuAccessController implements D
                 'parent'              => $key->parent,
                 'menu_order'              => $key->menu_order,
                 'url'              => $key->url,
-                'access'              => $key->access ? 'Root' : 'User',
+                'access'              => $key->access ? 'User' : 'Root',
                 'btn_activation'    => ButtonHelper::btn_toggle_activation(
                     $status['color'],$key->id,
                     $key->status,
