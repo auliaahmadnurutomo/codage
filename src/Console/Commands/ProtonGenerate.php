@@ -39,7 +39,7 @@ class ProtonGenerate extends Command
             ->addArgument('file', InputArgument::REQUIRED, 'The file name')
             ->addOption('modal', null, InputOption::VALUE_NONE, 'Generate Form')
             ->addOption('menu', null, InputOption::VALUE_NONE, 'Generate menu as well')
-            ;
+        ;
     }
 
     /**
@@ -53,11 +53,11 @@ class ProtonGenerate extends Command
         $generateMenu = $this->option('menu');
 
         // Lakukan pengolahan sesuai dengan argumen dan opsi
-        $this->createController($folder, $file,$this->option('modal'));
-        $this->createListViewClass($folder, $file,$this->option('modal'));
+        $this->createController($folder, $file, $this->option('modal'));
+        $this->createListViewClass($folder, $file, $this->option('modal'));
         $this->generateView($folder, $file, $this->option('modal'));
         $this->createRoutingController($folder, $file);
-        
+
         if ($generateMenu) {
             $this->insertMenu($folder, $file);
         }
@@ -65,17 +65,17 @@ class ProtonGenerate extends Command
         $this->info('Files generated successfully.');
     }
 
-    protected function createController($folder, $file,$viewType)
+    protected function createController($folder, $file, $viewType)
     {
-        
-        $folderPath = app_path('Http/Controllers/' . $folder.'/'.$file);
+
+        $folderPath = app_path('Http/Controllers/' . $folder . '/' . $file);
 
         if (!is_dir($folderPath)) {
             mkdir($folderPath, 0755, true);
         }
 
-        
-        $namespace = 'App\\Http\\Controllers\\' . str_replace('/', '\\', $folder).'\\'.str_replace('/', '\\', $file);
+
+        $namespace = 'App\\Http\\Controllers\\' . str_replace('/', '\\', $folder) . '\\' . str_replace('/', '\\', $file);
         $controllerName = "{$folderPath}/{$file}Controller.php";
 
         if (File::exists($controllerName)) {
@@ -91,12 +91,11 @@ class ProtonGenerate extends Command
         }
         if ($viewType) {
             $templateController = 'ControllerTemplateModal';
-        }
-        else{
+        } else {
             $templateController = 'ControllerTemplate';
         }
         // isi controller dari template
-        $controllerContent = "<?php\n\n" . view('proton.controllers.'.$templateController.'', [
+        $controllerContent = "<?php\n\n" . view('proton.controllers.' . $templateController . '', [
             'folder' => $namespace,
             'file' => $file,
             'folderName' => $this->folderController,
@@ -110,16 +109,16 @@ class ProtonGenerate extends Command
         $this->info("Success generate controller {$controllerName}");
     }
 
-    protected function createListViewClass($folder, $file,$viewType)
+    protected function createListViewClass($folder, $file, $viewType)
     {
-        $folderPath = app_path('Http/Controllers/' . $folder.'/'.$file);
+        $folderPath = app_path('Http/Controllers/' . $folder . '/' . $file);
 
         // Pastikan folder sudah ada, jika belum, buat folder
         if (!is_dir($folderPath)) {
             mkdir($folderPath, 0755, true);
         }
 
-        $namespace = 'App\\Http\\Controllers\\' . str_replace('/', '\\', $folder).'\\'.str_replace('/', '\\', $file);
+        $namespace = 'App\\Http\\Controllers\\' . str_replace('/', '\\', $folder) . '\\' . str_replace('/', '\\', $file);
         $listView = "{$folderPath}/{$file}ListView.php";
 
         if (File::exists($listView)) {
@@ -135,12 +134,11 @@ class ProtonGenerate extends Command
         }
         if ($viewType) {
             $templateListView = 'ListViewTemplateModal';
-        }
-        else{
+        } else {
             $templateListView = 'ListViewTemplate';
         }
         // Simpan isi controller dari template
-        $controllerContent = "<?php\n\n" . view('proton.controllers.'.$templateListView.'', [
+        $controllerContent = "<?php\n\n" . view('proton.controllers.' . $templateListView . '', [
             'folder' => $namespace,
             'file' => $file,
             'folderName' => $this->folderController,
@@ -254,7 +252,7 @@ class ProtonGenerate extends Command
         }
 
         // Dapatkan namespace dari folder
-        $namespace = 'App\\Http\\Controllers\\' . str_replace('/', '\\', $folder).'\\'.str_replace('/', '\\', $file);
+        $namespace = 'App\\Http\\Controllers\\' . str_replace('/', '\\', $folder) . '\\' . str_replace('/', '\\', $file);
         $routeFile = "{$folderPath}/Route_{$file}.php";
 
         if (File::exists($routeFile)) {
@@ -273,7 +271,7 @@ class ProtonGenerate extends Command
         // Buat isi controller dari template
         $controllerContent = "<?php\n\n" . view('proton.RouteTemplate', [
             'folder' => $namespace,
-            'file' => $file.'Controller',
+            'file' => $file . 'Controller',
             'folderName' => $this->folderController,
             'controllerPath' => $routeName
             // 'imports' => $imports, // Jangan lupa menyertakan imports jika digunakan
@@ -284,18 +282,18 @@ class ProtonGenerate extends Command
 
         // Tulis isi controller ke file
         file_put_contents($routeFile, $controllerContent);
-        $this->addRouteWeb($routeName,$folder.'/Route_'.$file.'.php');
+        $this->addRouteWeb($routeName, $folder . '/Route_' . $file . '.php');
         $this->info("Success generate route {$routeFile}");
     }
 
-    protected function insertMenu($folder,$file)
+    protected function insertMenu($folder, $file)
     {
         $newMenu = Utility::toCamelCase($file);
-        DB::table('skeleton_setting_menu_access')->where('url',$newMenu)->delete();
+        DB::table('skeleton_setting_menu_access')->where('url', $newMenu)->delete();
         $dataInsert = [
             'id_parent' => 0,
             'menu_order' => DB::table('skeleton_setting_menu_access')->max('menu_order') + 1,
-            'name' => $this->folderController .'/'. $file,
+            'name' => $this->folderController . '/' . $file,
             'type' => 1,
             'url' => $newMenu,
             'icon' => 'far fa-square',
@@ -303,9 +301,10 @@ class ProtonGenerate extends Command
             'access' => 1
         ];
         DB::table('skeleton_setting_menu_access')->insert($dataInsert);
+        $menu_access = DB::table('skeleton_setting_menu_access')->orderBy('menu_order')->get();
         $menu = new GenerateMenuSidebar();
         session([
-            'menu' => $menu->get_menu_access(1) //id_access
+            'menu' => $menu->get_menu_access($menu_access) //id_access
         ]);
         $this->info("Success create menu  " . $file . " :  {url($newMenu)}");
     }

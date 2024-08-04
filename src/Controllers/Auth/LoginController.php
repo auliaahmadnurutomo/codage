@@ -68,15 +68,14 @@ class LoginController extends Controller
                 // dd($userInfo);
             }
             // Jika akun aktif, tambahkan informasi ke session
-            $menu_access = DB::table('skeleton_setting_menu_access as a')->join('skeleton_setting_template_access as b','b.id_menu_access','a.id')->where('b.id_menu_template',$userInfo->id_access_template)->select('a.*')->orderBy('a.menu_order')->get();
-            // $menu_access = DB::table('skeleton_setting_menu_access as a')->select('a.*')->orderBy('a.menu_order')->get();
+            $access = $this->getAccess($userInfo);
             $menu = new GenerateMenuSidebar();
             session([
                 'department' => $userInfo->department,
                 'position' => $userInfo->position,
                 'office' => $userInfo->office,
-                'menu' => $menu->get_menu_access($menu_access), //id_access
-                'access' => $menu_access->toArray()
+                'menu' => $menu->get_menu_access($access), //id_access
+                'access' => $access->toArray()
             ]);
 
             // dd(session()->all());
@@ -97,11 +96,23 @@ class LoginController extends Controller
             ->leftJoin('skeleton_setting_office as c', 'c.id', 'b.id_office')
             ->leftJoin('skeleton_setting_department as d', 'd.id', 'b.id_department')
             ->leftJoin('skeleton_setting_position as e', 'e.id', 'b.id_position')
-            ->select('a.status as user_status', 'b.status','b.id_access_template' ,'c.name as office', 'd.name as department', 'e.name as position')
+            ->select('b.status as user_status','b.id_access_template' ,'c.name as office', 'd.name as department', 'e.name as position')
             ->where('a.id', $user->id)->first();
     }
 
-    private function getMenuAccess($user)
+    private function getAccess($userInfo)
     {
+        if($userInfo->id_access_template){
+            $menu_access = DB::table('skeleton_setting_menu_access as a')
+            ->join('skeleton_setting_template_access as b','b.id_menu_access','a.id')
+            ->where('b.id_menu_template',$userInfo->id_access_template)
+            ->select('a.*')
+            ->orderBy('a.menu_order')
+            ->get();
+        }
+        else{
+            $menu_access = DB::table('skeleton_setting_menu_access')->orderBy('menu_order')->get();
+        }
+        return $menu_access;
     }
 }
