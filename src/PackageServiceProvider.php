@@ -26,8 +26,13 @@ class PackageServiceProvider extends ServiceProvider
             __DIR__.'/../public/theme' => public_path('theme'),
             __DIR__.'/Codeton' => app_path('Codeton'),
             __DIR__.'/Console/Commands' => app_path('Console/Commands'),
+
+            __DIR__.'Controllers/Auth/LoginController.php' => app_path('Http/Controllers/Auth/LoginController.php'),
+            __DIR__.'Controllers/root' => app_path('Http/Controllers/root'),
+            __DIR__.'Controllers/setting' => app_path('Http/Controllers/setting'),
+
             __DIR__.'/Helpers' => app_path('Helpers'),
-            __DIR__.'/GenerateMenuSidebar.php' => app_path('GenerateMenuSidebar.php'),
+            __DIR__.'/Codeton/GenerateMenuSidebar.php' => app_path('GenerateMenuSidebar.php'),
             __DIR__.'/../resources/views/components' => resource_path('views/components'),
             __DIR__.'/../resources/views/response' => resource_path('views/layouts'),
             __DIR__.'/../resources/views/proton' => resource_path('views/proton'),

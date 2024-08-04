@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\GenerateMenuSidebar;
+use App\Codeton\GenerateMenuSidebar;
 use App\Helpers\Utility;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

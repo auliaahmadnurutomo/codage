@@ -1,25 +1,21 @@
 <?php
-namespace App;
+namespace App\Codeton;
 use DB;
 use Auth;
 class GenerateMenuSidebar {
 
-	public function get_menu_access($menu_access){
-		// $menu_access = DB::table('setting_staff_access as a')
-  //                       ->leftJoin('setting_menu_access as b','b.id','a.id_menu_access')
-  //                       ->where('a.id_staff',$id_staff)
-  //                       ->select('b.*')
-  //                       ->orderBy('b.id')
-  //                       ->get();
-        // $menu_access = DB::table('setting_template_access as a')
-        //                 ->leftJoin('setting_template_access_detail as b','b.id_template_access','a.id')
-        //                 ->leftJoin('setting_menu_access as c','c.id','b.id_menu_access')
-        //                 ->where('a.id',$id_template_access)
-        //                 ->where('c.status',1)
-        //                 ->select('c.*')
-        //                 ->orderBy('c.menu_order','asc')
-        //                 ->get();
-        
+	public function get_menu_access($id_access){
+        if($id_access){
+            $menu_access = DB::table('skeleton_setting_menu_access as a')
+            ->join('skeleton_setting_template_access as b','b.id_menu_access','a.id')
+            ->where('b.id_menu_template',$id_access)
+            ->select('a.*')
+            ->orderBy('a.menu_order')
+            ->get();
+        }
+        else{
+            $menu_access = DB::table('skeleton_setting_menu_access')->orderBy('menu_order')->get();
+        }
 		return $this->html_ordered_menu($menu_access,0);
 	}
 
