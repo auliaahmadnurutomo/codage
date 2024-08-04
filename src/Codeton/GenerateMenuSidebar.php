@@ -4,18 +4,7 @@ use DB;
 use Auth;
 class GenerateMenuSidebar {
 
-	public function get_menu_access($id_access){
-        if($id_access){
-            $menu_access = DB::table('skeleton_setting_menu_access as a')
-            ->join('skeleton_setting_template_access as b','b.id_menu_access','a.id')
-            ->where('b.id_menu_template',$id_access)
-            ->select('a.*')
-            ->orderBy('a.menu_order')
-            ->get();
-        }
-        else{
-            $menu_access = DB::table('skeleton_setting_menu_access')->orderBy('menu_order')->get();
-        }
+	public function get_menu_access($menu_access){
 		return $this->html_ordered_menu($menu_access,0);
 	}
 

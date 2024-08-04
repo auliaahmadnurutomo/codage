@@ -97,16 +97,17 @@
 
         <!-- TOP-NAV -->
         <nav id="top-nav" class="fixed-top bg-transparent">
-            <div class="navbar py-3 bg-white border-bottom">
+            <div class="navbar py-2 bg-white shadow-sm">
                 
-                <button class="btn btn-sm btn-menu text-primary
+                <button class="btn btn-sm btn-menu border rounded text-primary
               "><i class="fa fa-bars"></i>
                 </button>
                 
                 <span class="text-center m-0 d-block d-md-none h4 text-primary">{{env('APP_NAME')}}</span>
                 <div class="nav">
                     <div class="nav-item dropdown mr-0 mx-md-3">
-                        <button data-toggle="dropdown" class="btn btn-sm rounded-circle bg-primary"><i class="fa fa-user text-white"></i></button>
+                        <button data-toggle="dropdown" class="btn btn-link border rounded-circle">
+                            <i class="text-primary fa fa-user fa-sm text-white"></i></button>
                         <div>
                             <div class="dropdown-menu dropdown-menu-right">
                                 <a href="{{url('usersProfile')}}" class="dropdown-item"><i class="fa fa-cog"></i> {{Auth::user()?->name}}</a>
@@ -165,11 +166,6 @@
 
 
         <main role="main" class="main pt-3 mt-3 bg-light">
-            <!-- <div id="page-header" class="justify-content-between d-none d-md-flex p-3 p-md-4 bg-light mt-5">
-                <div>
-                    <h5  class="text-center text-md-left mb-0 font-weight-bold text-muted">{{$section}}</h5>
-                </div>
-            </div> -->
             <div class="app-content p-3 p-md-4 mt-4 bg-white">
                 @yield('content')
             </div>

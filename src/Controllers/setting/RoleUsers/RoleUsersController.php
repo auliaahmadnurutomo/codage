@@ -99,7 +99,7 @@ class RoleUsersController extends Codeton
                 'name'              => $request->name,
                 'id_user_insert'    => Auth::user()->id,
                 'id_user_update'    => Auth::user()->id,
-                'id_site'           => 1
+                'id_office'           => 1
             );
             DB::beginTransaction();
             $idRole = DB::table($this->main_table)->insertGetId($data_insert);
@@ -182,7 +182,7 @@ class RoleUsersController extends Codeton
             );
             DB::beginTransaction();
             DB::table($this->main_table)->where('id',$id)
-            ->where('id_site',1) //dev
+            // ->where('id_office',1) //dev
             ->update($data_update);
 
             //insert access

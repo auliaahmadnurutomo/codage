@@ -21,8 +21,8 @@
       
   </div>
   <div class="sidebar-item d-none d-lg-block text-center text-white pt-1" style="height:250px;width:100%;background-color: rgba(255, 255, 255, 0.32);">
-        <img src="{{asset('img/logo-sidebar.webp')}}" style="max-width: 50px;margin-top:5px;" alt="Midas APP" loading="lazy">
-        <span class="ml-2 mt-5">Codage</span>
+        <img src="{{asset('img/logo-sidebar.webp')}}" style="max-width: 50px;margin-top:5px;" alt="Logo Sidebar" loading="lazy">
+        <span class="ml-2 mt-5">{{ config('app.name', 'Laravel') }}</span>
       </div>
 </nav>
 <div class="sidebar-backdrop" data-toggle="sidebar"></div>

@@ -33,18 +33,12 @@ $section = 'Form Create ';
         </div>
     </div>
 
-    <x-select label="Mechanics Team" name="id_office" search="true" width="3" required="required">
-        @foreach(@$workshop as $item)
-        <option value="{{$item->id}}" {{@$results->id_office == $item->id ? 'selected':''}}>Workshop : {{$item->name}}</option>
+    <x-select label="Office" name="id_office" search="true" width="3" required="required">
+        @foreach(@$offices as $item)
+        <option value="{{$item->id}}" {{@$results->id_office == $item->id ? 'selected':''}}>{{$item->name}}</option>
         @endforeach
     </x-select>
 
-    <x-select label="Service Truck" name="id_service_truck" search="true" width="3">
-        <option value="null">-</option>
-        @foreach(@$service_truck as $item)
-        <option value="{{$item->id}}" {{@$results->id_service_truck == $item->id ? 'selected':''}}>Service Truck : {{$item->name}}</option>
-        @endforeach
-    </x-select>
     
     <x-select label="Department" name="id_department" search="true" width="3" required="required">
         @foreach(@$department as $dpt)
@@ -67,31 +61,7 @@ $section = 'Form Create ';
             </div>
         </div>
     </div>
-    <hr>
-    <!-- <div class="form-group row required">
-        <label class="col-md-3 control-label">Workshop Approval</label>
-        <div class="col-md-9">
-            @foreach ($workshop as $item)
-            {{-- {{ $item->name }} --}}
-            @php
-            $checked = '';
-            foreach (@$users_workshop as $user_workshop) {
-            foreach (json_decode($user_workshop->user_workshop) as $user_wrk) {
-            $item->name == $user_wrk ? $checked .= 'checked' : $checked .= '';
-            }
-            }
-            @endphp
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="user_workshop[]" value="{{ $item->name }}"
-                    id="defaultCheck1" {!! $checked !!}>
-                <label class="form-check-label" for="defaultCheck1">
-                    {{ $item->name }}
-                </label>
-            </div>
-            @endforeach
-            <span id="user_workshop" class="text-danger" data-label="alert"></span>
-        </div>
-    </div> -->
+    
     <hr>
 
     <div class="alert alert-danger print-error-msg" style="display:none">

@@ -1,12 +1,11 @@
 # codage
 Codeton Generator
 
-## composer require utomo/codage:v1.1.5
-
-## php artisan vendor:publish --tag=utomo-codage --force
-
-
 # Step
+
+### 0. Install fresh laravel 10
+`composer create-project laravel/laravel:^10.0 example-app`
+
 ### 1. Add Package laravel ui
 `composer require laravel/ui`
 
@@ -16,14 +15,9 @@ Codeton Generator
 ### 3. Install & Compile Package
 `npm install && npm run build`
 
-### 5. Set session to table database
-`php artisan session:table`
 
 ### 6. Update session drive to database on .env
 `SESSION_DRIVER=database`
-
-### 7. Add queue
-`php artisan queue:table`
 
 ### 8. Set queue connection to database on .env
 `QUEUE_CONNECTION=database`
@@ -35,24 +29,6 @@ Codeton Generator
 ### 10. Run Laravel
 `php artisan serve`
 
-<hr>
-<br>
-
-## Install Migration Generator
-
-`composer require --dev kitloong/laravel-migrations-generator`
-
-### 1. Generate all tables
-
-`php artisan migrate:generate`
-
-### 2. Generate Specified Tables
-
-`php artisan migrate:generate --tables="table1,table2"`
-
-### 3. Squash Migrations into single file
-
-`php artisan migrate:generate --squash`
 <hr>
 <br>
 
@@ -81,21 +57,8 @@ Codeton Generator
         Paginator::useBootstrap();
     }
 
+### 6. Include default route to routes>web.php
+    require __DIR__.'/default.php';
+
 ### 6. How to Generate Code
 For generate codage skeleton, please refer to [Codefio](https://codefio.gitbook.io/codeton)
-
-
-## Altering Table add column(s)
-
-    public function up()
-    {
-        DB::statement("ALTER TABLE table ADD column custom_type NOT NULL");
-    }
-
-## Optional install seeder generator
-
-### 1. Install Package Orangehill
-`composer require orangehill/iseed`
-
-### 2. Generate data from tables
-`php artisan iseed my_table,another_table`

@@ -32,8 +32,8 @@ class SettingUsersListView extends SettingUsersController implements DefaultFact
     		["col" => "a.name","title"=>"Name","first"=>1,"mw"=>200],
             ["col" => "a.email","title"=>"Email","first"=>0,"mw"=>150],
             ["col" => "e.name", "title" => "Role", "first" => 0],
-            ["col" => "c.name", "title" => "Workshop Team", "first" => 0],
-            ["col" => "a.status","title"=>"Status","first"=>0]
+            ["col" => "office.name", "title" => "Office", "first" => 0],
+            ["col" => "d.status","title"=>"Status","first"=>0]
     	];
     }
 
@@ -74,11 +74,12 @@ class SettingUsersListView extends SettingUsersController implements DefaultFact
 		$dataList =
 		//free fow query list
         DB::table($this->main_table . ' as a')
-        ->leftJoin('users_workshop as b', 'b.id_user', 'a.id')
-        ->leftJoin('setting_workshop as c', 'c.id', 'a.id_office')
         ->leftJoin('skeleton_users_info as d','d.id_user','a.id')
+        ->leftJoin('skeleton_setting_department as dept','dept.id','d.id_department')
+        ->leftJoin('skeleton_setting_position as pos','pos.id','d.id_position')
+        ->leftJoin('skeleton_setting_office as office','office.id','d.id_office')
         ->leftJoin('skeleton_setting_menu_template as e','e.id','d.id_access_template')
-        ->selectRaw('a.*, b.id_user, b.user_workshop, c.name as office_name, c.id as id_office,e.name as role');
+        ->selectRaw('a.*,d.status, dept.name as department, pos.name as staff_position, office.name as office, e.name as role');
 		return $dataList;
 	}
 
@@ -93,7 +94,7 @@ class SettingUsersListView extends SettingUsersController implements DefaultFact
                 'name'              => $key->name,
                 'email'              => $key->email,
                 'role'              => $key->role,
-                'office_name'              => $key->office_name,
+                'office_name'              => $key->office,
                 'btn_activation'    => ButtonHelper::btn_toggle_activation(
                     $status['color'],$key->id,
                     $key->status,
@@ -122,11 +123,11 @@ class SettingUsersListView extends SettingUsersController implements DefaultFact
         $status = $this->request->get('status');
         $office_detail = $this->request->get('office_detail');
         if(is_numeric($status)) {
-            $dataList->where('a.status',$status);
+            $dataList->where('d.status',$status);
         }
 
         if ($office_detail) {
-            $dataList->where('c.name', $office_detail);
+            $dataList->where('office.code', $office_detail);
         }
         //lanjutkan filter
         return $dataList;

@@ -7,7 +7,7 @@
                     @csrf
                     @if(!empty($column_search) && isset($column_search))
                     <div class="col-sm-4 my-1">
-                        <select id="getColumn" class="selectpicker w-100 border rounded" data-placeholder="Kolom yang dicari" name="getColumn" required>
+                        <select id="getColumn" class="selectpicker w-100 border rounded" data-placeholder="Search Column" name="getColumn" required>
                             @foreach(@$column_search as $cs => $valCs)
                               <option value= "{{ $cs }}" {{ $cs = @$getColumn ? "selected" : "" }} > {{ $valCs['label'] }}</option>
                             @endforeach
@@ -50,17 +50,20 @@
           <div class="modal fade" id="side-filter" tabindex="-1" role="dialog" aria-labelledby="side-filter" aria-hidden="true">
               <div class="modal-dialog modal-sm modal-dialog-slideout" role="document">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Filter {{$section}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <div class="modal-header bg-light">
+                    <div class="modal-title" id="exampleModalLabel">Filter {{$section}}</div>
+                    {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">×</span>
-                    </button>
+                    </button> --}}
                   </div>
                   <div class="modal-body">
                     <form id="formFilter" action="javascript:filter(this);" method="post">
                         @yield('filter-field')
-                        <div class="text-center text-xl-left">
+                        <div class="text-center">
                             <button id="btn-search" class="btn alert-primary " data-loading="Filtering ...">&nbspApply Filter</button>
+                            <button type="button" class="btn" data-dismiss="modal">
+                              Close
+                            </button>
                         </div>
                       
                     </form>

@@ -28,6 +28,7 @@ class PackageServiceProvider extends ServiceProvider
             __DIR__.'/Console/Commands' => app_path('Console/Commands'),
             
             //publish controller scaffolding
+            __DIR__.'/Controllers/Codeton.php' => app_path('Http/Controllers/Codeton.php'),
             __DIR__.'/Controllers/Auth/LoginController.php' => app_path('Http/Controllers/Auth/LoginController.php'),
             __DIR__.'/Controllers/root' => app_path('Http/Controllers/root'),
             __DIR__.'/Controllers/setting' => app_path('Http/Controllers/setting'),
@@ -38,6 +39,7 @@ class PackageServiceProvider extends ServiceProvider
             //publish route scaffolding
             __DIR__.'/../routes/root' => base_path('routes/root'),
             __DIR__.'/../routes/setting' => base_path('routes/setting'),
+            __DIR__.'/../routes/default.php' => base_path('routes/default.php'),
 
             //publish view scaffolding
             __DIR__.'/../resources/views/components' => resource_path('views/components'),
@@ -46,6 +48,8 @@ class PackageServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views/response' => resource_path('views/response'),
             __DIR__.'/../resources/views/root' => resource_path('views/root'),
             __DIR__.'/../resources/views/setting' => resource_path('views/setting'),
+            __DIR__.'/../resources/views/layouts' => resource_path('views/layouts'),
+            __DIR__.'/../resources/views/home.blade.php' => resource_path('views/home.blade.php'),
         ], 'utomo-codage');
     }
 }

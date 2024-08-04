@@ -883,7 +883,7 @@ function changeSearchPlaceholder(){
     // alert(selectedOption.text)
     var input = document.getElementById("stringToSearch");
     input.placeholder = "Placeholder Baru";
-    input.placeholder = 'Cari '+selectedOption.text;
+    input.placeholder = 'Search For '+selectedOption.text;
 }
 
 function reset_nav(){

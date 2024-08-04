@@ -39,10 +39,7 @@ class usersProfileController extends Codeton
         $data['results'] = DB::table($this->main_table)
             ->where('id', Auth::user()->id)
             ->first();
-        $data['office'] = DB::table('skeleton_setting_office')->get();
         $data['backlink'] = '/';
-        $data['department'] = DB::table('skeleton_setting_department')->get();
-        $data['staff_position'] = DB::table('skeleton_setting_position')->get();
         $data['type'] = 'edit';
         return view($this->view_folder . '.form', $data);
     }
@@ -73,14 +70,6 @@ class usersProfileController extends Codeton
         
         try {
             $affectedRows = null;
-            if($request->file('img_path')) {
-                $data_update = array(
-                    'img_path'  => $request->img_path
-                );
-                $fileName = 'user_profile';
-                $data_update = $this->checkFileUpload($request, $data_update, $fileName);
-                $affectedRows = DB::table($this->main_table)->where('id', Auth::user()->id)->update($data_update);
-            }
             if($request->password != null) {
                 $data_update = array(
                     'password'  => Hash::make($request->password)
@@ -106,8 +95,8 @@ class usersProfileController extends Codeton
                 File::delete($userAuth->img_path);
             }
             $imageName = time() . '-user-profile.' . $request->img_path->extension();
-            $uploadedImage = $request->img_path->move(public_path('storage/' . $fileName . '/'), $imageName);
-            $imagePath = 'storage/' . $fileName . '/' . $imageName;
+            $uploadedImage = $request->img_path->move(public_path('storage/avatar/' . $fileName . '/'), $imageName);
+            $imagePath = 'storage/avatar/' . $fileName . '/' . $imageName;
 
             $data['img_path'] = $imagePath;
         }
