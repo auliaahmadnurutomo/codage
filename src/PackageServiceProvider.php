@@ -41,6 +41,10 @@ class PackageServiceProvider extends ServiceProvider
             __DIR__.'/../routes/setting' => base_path('routes/setting'),
             __DIR__.'/../routes/default.php' => base_path('routes/default.php'),
 
+            //publish db scaffold
+            __DIR__.'/../database/migrations' => base_path('database/migrations'),
+            __DIR__.'/../database/seeders' => base_path('database/seeders'),
+
             //publish view scaffolding
             __DIR__.'/../resources/views/components' => resource_path('views/components'),
             __DIR__.'/../resources/views/response' => resource_path('views/layouts'),
