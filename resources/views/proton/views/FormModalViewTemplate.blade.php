@@ -31,7 +31,9 @@
         //pastikan tidak ada variable, id, class yang conflict dengan variable page-index
         //yang dipake js di page-index
         jQuery(document).ready(function(){
-            $("select").selectpicker();
+            $("select").select2({
+                theme: 'bootstrap4',
+            });
             // Load fungsi js untuk form modal lainnya
 
             dynamic_url = controller_path+"/{{@$type == 'create' ? 'store' : 'update'}}";

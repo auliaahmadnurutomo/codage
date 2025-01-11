@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div id="page-header" class="justify-content-between d-none d-md-flex align-items-center mb-4">
+    <div id="page-header" class="justify-content-between d-none d-md-flex align-items-center mb-4 pt-4">
         <div>
             <h5 class="text-center text-md-left mb-0 text-muted">{{ $section }}</h5>
         </div>

@@ -3,32 +3,32 @@ let desc = 'asc';
 let border_order_table = 'bg-light';
 
 function interval_reload(){
-    var timer;
+    // var timer;
     
-    $(window).on('mousemove', function() {
-        clearInterval(timer);
-        if(startReload){
-            timer = setInterval(update, 20000);
-        }
+    // $(window).on('mousemove', function() {
+    //     clearInterval(timer);
+    //     if(startReload){
+    //         timer = setInterval(update, 20000);
+    //     }
         
-    }).trigger('mousemove');
+    // }).trigger('mousemove');
     
-    function update() {
-      if($('.modal').hasClass('show')){
-        console.log('modal show');
-      } 
-      else{
-        if(startReload){
-            var currentUrl = window.location.href;
-            console.log('update');
-            hot_reload(currentUrl);
-        }
-        else{
-            console.log('expired');
-            clearInterval(timer);
-        }
-      }
-    }
+    // function update() {
+    //   if($('.modal').hasClass('show')){
+    //     console.log('modal show');
+    //   } 
+    //   else{
+    //     if(startReload){
+    //         var currentUrl = window.location.href;
+    //         console.log('update');
+    //         hot_reload(currentUrl);
+    //     }
+    //     else{
+    //         console.log('expired');
+    //         clearInterval(timer);
+    //     }
+    //   }
+    // }
 }
 
 function hot_reload(gotoWhere){
@@ -186,17 +186,19 @@ function ajaxSubmit(formID)
     });
 }
 
-function ajaxFormSubmit() {
-    var formInput = $('#formData');
+function ajaxFormSubmit(url = null,form = null) {
+    var formInput = (form === null) ? $('#formData'):$('#'+form);
     var btn = $('#btn-submit');
     var curr_text = btn.html();
     $('input, select').removeClass('error-input');
     $('[data-label="alert"]').html('');
 
+    var submitUrl = (url === null) ? dynamic_url : url;
+
     var formData = new FormData(formInput[0]);
 
     $.ajax({
-        url: dynamic_url,
+        url: submitUrl,
         type: 'POST',
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -405,9 +407,14 @@ function initOldDateRange(fromOld,toOld,max){
         changeMonth: true,
         changeYear: true,
         onSelect: function onSelect(dateStr) {
-            var max = $(this).datepicker('getDate'); // Get selected date
+            var maxDate = $(this).datepicker('getDate'); // Get selected date
 
-            $(toOld).datepicker('option', 'minDate', max || '0'); // Set other max, default to today
+            $(toOld).datepicker('option', 'minDate', maxDate || '0'); // Set other max, default to today
+            if(max){
+                var minDate = new Date(maxDate.valueOf());
+                minDate.setDate(minDate.getDate() + max);
+                $(toOld).datepicker('option', 'maxDate', minDate);
+            }
         },
         onClose: function onClose() {
             $(toOld).focus();
@@ -419,7 +426,8 @@ function initOldDateRange(fromOld,toOld,max){
         changeMonth: true,
         changeYear: true,
         onSelect: function onSelect(dateStr) {
-            var start = $(fromOld).datepicker("getDate");
+            
+            // var start = $(fromOld).datepicker("getDate");
             var end = $(toOld).datepicker("getDate");
             var rawStart = $(fromOld).val();
             var rawEnd = $(toOld).val();
@@ -427,6 +435,7 @@ function initOldDateRange(fromOld,toOld,max){
             if (rawStart == rawEnd) {
                 end = end.setDate(end.getDate() + 1);
             }
+            
         }
     });
 }

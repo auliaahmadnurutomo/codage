@@ -7,7 +7,7 @@
                     @csrf
                     @if(!empty($column_search) && isset($column_search))
                     <div class="col-sm-4 my-1">
-                        <select id="getColumn" class="selectpicker w-100 border rounded" data-placeholder="Search Column" name="getColumn" required>
+                        <select id="getColumn" class="w-100 border rounded" data-placeholder="Search Column" name="getColumn" required>
                             @foreach(@$column_search as $cs => $valCs)
                               <option value= "{{ $cs }}" {{ $cs = @$getColumn ? "selected" : "" }} > {{ $valCs['label'] }}</option>
                             @endforeach
@@ -36,9 +36,9 @@
                 <div class="d-flex justify-content-between justify-content-md-end">
                  
 
-                  <a href="{{url($controller_path)}}" class="btn btn-light border mr-2"><i class="fa fa-sync-alt fa-xs mr-1 text-primary"></i></a>
+                  <a href="{{url($controller_path)}}" class="btn btn-light border mr-2 text-secondary"><i class="fa fa-sync-alt mr-1 text-warning"></i><small class="d-none d-lg-inline-flex ml-1">Reload</small></a>
                   @if ($__env->hasSection('filter-field'))
-                  <button class="btn btn-light border" data-toggle="modal" data-target="#side-filter"><i class="fa fa-filter fa-xs mr-1 text-primary"></i></button>
+                  <button class="btn btn-light border" data-toggle="modal" data-target="#side-filter"><i class="fa fa-filter mr-1 text-primary"></i><small class="d-none d-lg-inline-flex ml-1">Filter</small></button>
                   @endif
                   
                 </div>
