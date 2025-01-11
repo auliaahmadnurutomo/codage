@@ -22,13 +22,15 @@
 
     <link rel="stylesheet" type="text/css" href="{{asset('theme/fontawesome/css/all.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('theme/jquery-ui/jquery-ui.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('theme/bootstrap-select/bootstrap-select.min.css')}}">
+    {{-- <link rel="stylesheet" type="text/css" href="{{asset('theme/bootstrap-select/bootstrap-select.min.css')}}"> --}}
     <link rel="stylesheet" type="text/css" href="{{asset('theme/css/style.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('theme/css/loaderfio.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('theme/css/table-sortable.css')}}">
 
     <link rel="stylesheet" type="text/css" href="{{asset('theme/css/vmenuModule.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('theme/css/page-index.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('theme/select2/css/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('theme/select2/select2-bootstrap4.min.css')}}">
     <script type="text/javascript" src="{{asset('theme/js/jquery-3.4.1.min.js')}}"></script>
 
     <script type="text/javascript" src="{{asset('theme/js/popper.min.js')}}"></script>
@@ -37,6 +39,7 @@
     <script type="text/javascript" src="{{asset('theme/jquery-confirm/jquery-confirm.min.js')}}"></script>
     <script src="{{ asset('theme/js/validator.js') }}" defer></script>
     <script src="{{ asset('theme/js/vmenuModule.js') }}" defer></script>
+    <script type="text/javascript" src="{{asset('theme/select2/js/select2.min.js')}}"></script>
 
 
 </head>
@@ -97,13 +100,24 @@
 
         <!-- TOP-NAV -->
         <nav id="top-nav" class="fixed-top bg-transparent">
-            <div class="navbar py-2 bg-white shadow-sm">
+            <div class="navbar py-2 bg-white border-bottom">
+            
+                <div class="d-flex">
+                    <button class="btn btn-sm btn-menu border rounded text-primary mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    @if (empty(session('office_access')))
+                        <h5 class="mt-1 mb-0 text-muted"><strong>{{session('office')}}</strong></h5>
+                    @else
+                        <select id="officeChange" class="form-control form-control-sm rounded border" data-size="5" data-live-search="true" data-width="250px">
+                            @foreach (session('office_access') as $office)
+                                <option value="{{$office->id}}" data-subtext="{{$office->code}}" {{session('office_id') == $office->id ? 'selected':''}}>{{$office->name}}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
                 
-                <button class="btn btn-sm btn-menu border rounded text-primary
-              "><i class="fa fa-bars"></i>
-                </button>
-                
-                <span class="text-center m-0 d-block d-md-none h4 text-primary">{{env('APP_NAME')}}</span>
                 <div class="nav">
                     <div class="nav-item dropdown mr-0 mx-md-3">
                         <button data-toggle="dropdown" class="btn btn-link border rounded-circle">
@@ -115,7 +129,6 @@
                                 <a href="{{url('logout')}}" class="dropdown-item"><i class="fa fa-power-off text-danger"></i> &nbspLogout</a>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
                 <style type="text/css">
@@ -165,8 +178,8 @@
         
 
 
-        <main role="main" class="main pt-3 mt-3 bg-light">
-            <div class="app-content p-3 p-md-4 mt-4 bg-white">
+        <main role="main" class="main my-0  bg-white">
+            <div class="app-content px-3 px-md-4 my-0" >
                 @yield('content')
             </div>
         </main>
@@ -200,7 +213,7 @@
 </body>
         
 <!-- JS SCRIPT  -->
-<script type="text/javascript" src="{{asset('theme/bootstrap-select/bootstrap-select.min.js')}}"></script>
+{{-- <script type="text/javascript" src="{{asset('theme/bootstrap-select/bootstrap-select.min.js')}}"></script> --}}
 <script type="text/javascript" src="{{asset('theme/jquery-ui/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('theme/js/jquery.form.js')}}"></script>
 <script type="text/javascript" src="{{asset('theme/js/script.js')}}"></script>
@@ -223,37 +236,48 @@
           }
         });
         $('#officeChange').on('change',function(){
-            off_Change($(this).val(),$("#officeChange option:selected").text());
-            $("#officeChange").selectpicker('refresh');
-
+            off_Change($(this).val());
+            // $("#officeChange").select2('refresh');
         });
-
-        function off_Change(whereToGo,whatsName)
+        
+        function off_Change(officeId)
         {
-            var url        = "{{url('off_Change')}}";
-            var GoTo = whereToGo;
-            showFullLoader()
+            var url = "{{url('officeAccess/changeOffice')}}";
+            showFullLoader();
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
                 type: "POST",
                 url:url,
-                data: {'change':GoTo},
+                data: {
+                    'id_office': officeId,
+                    'controller_path': '{{@$controller_path}}'
+                },
                 success: function(data){
-                    
-                    van_modal(['Success','Switch to area '+whatsName]);
+                    hideFullLoader();
 
+                    if(data.status == 401) {
+                        van_modal();
+                    } else {
+                        $("#response-click .modal-content").html(data);
+                        $("#response-click").modal({'keyboard':false,'backdrop':'static',});
+                    }
                 },
                 error: function(data){
-                    // $("#officeChange").val('').selectpicker('refresh');
-                    // if(data.status == 419 || data.status == 401){
-                    //     van_modal();
-                    // }
-                    van_modal();
+                    $("#officeChange").val('').select2('refresh');
+                    if(data.status == 419 || data.status == 401){
+                        van_modal();
+                    }
                 }
             });
         }
+        $('select:not(.selectpicker, .exclude-predefine-select2)').select2({
+            placeholder: function() {
+                return $(this).data('placeholder');
+            },
+            theme: 'bootstrap4',
+        });
     });
 
 

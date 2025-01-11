@@ -27,7 +27,9 @@
 @section('form-js')
     <script type="text/javascript">
         jQuery(document).ready(function(){
-            $("select").selectpicker();
+            $("select").select2({
+                theme: 'bootstrap4',
+            });
             dynamic_url = controller_path+"/{{@$type == 'create' ? 'store' : 'update'}}";
             $('#formData').validator();
             dateInit('#MaxToday','-5Y',0);
