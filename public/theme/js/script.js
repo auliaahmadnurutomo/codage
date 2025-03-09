@@ -342,6 +342,33 @@ function append_to_basic_error(msg,formID = '#formData')
         $(formID+' .form-group').find('#'+arr[0]).html(arr[1]);
     }
 }
+
+// function append_to_basic_error(msg, formID = '#formData') {
+//     var message = msg;
+    
+//     // Handle form error indicators
+//     for(var i = 0; i < message.length; i++) {
+//         var arr = message[i].split('-@-');
+//         document.getElementsByName(arr[0])[0].className += ' error-input';
+//         $(formID + ' .form-group').find('#' + arr[0]).html(arr[1]);
+//     }
+
+//     // Display errors in toast if toast functionality exists
+//     if (typeof showToastNotif !== 'undefined') {
+//         $("#liveToast .toast-body").find("ul").html('');
+//         $("#liveToast .toast-header").addClass('bg-danger text-white');
+//         $('#liveToast .toast-header .header').html('Error Validation');
+//         $("#liveToast .toast-body").addClass('alert-danger');
+        
+//         for(var i = 0; i < message.length; i++) {
+//             var arr = message[i].split('-@-');
+//             $("#liveToast .toast-body").find("ul").append('<li>' + arr[1] + '</li>');
+//         }
+        
+//         $('.toast').toast('show');
+//     }
+// }
+
 function orderData(orderBy,orderType)
 {
     var url        = window.location.href;
@@ -471,6 +498,66 @@ function initNewDateRange(fromNew,toNew,set31=false){
         changeYear: true,
     });
 
+}
+
+//hanya untuk positif
+function formatThousandSeparator(value) {
+    // Remove non-numeric characters except dots
+    let numericValue = value.toString().replace(/[^\d]/g, '');
+    
+    // Format with thousand separator if value exists
+    if (numericValue) {
+        return parseInt(numericValue).toLocaleString('id-ID');
+    }
+    // return '';
+    return 0;
+}
+
+// Fungsi untuk format angka dengan titik sebagai pemisah ribuan
+function formatNumberWithComma(number) {
+    if (number == null || number === '') {
+        return '';  // Kembalikan string kosong jika input null atau empty
+    }
+
+    var isNegative = number[0] === '-';
+    if (isNegative) {
+        number = number.substring(1);  // Hapus tanda minus untuk sementara
+    }
+
+    // Hapus semua karakter yang bukan angka atau koma
+    number = number.toString().replace(/[^\d]/g, '');  // Hapus semua karakter non-angka
+
+    // Pisahkan angka desimal (jika ada)
+    var parts = number.split(',');  // Misalnya "1000,50" => ["1000", "50"]
+
+    // Format bagian ribuan
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");  // Format ribuan dengan titik
+
+    if (isNegative) {
+        formattedNumber = '-' + formattedNumber;
+        // formattedNumber = '0';
+    }
+    // Gabungkan kembali bagian ribuan dan desimal (jika ada)
+    return parts.join(',');
+}
+
+function removeNumberSeparator(number) {
+    if (number == null || number === '') {
+        return 0; // Kembalikan string kosong jika number null, undefined, atau kosong
+    }
+    // return number.replace(/\./g, '');
+    return number.toString().replace(/\./g, '');  // Menghapus titik
+}
+
+function onChangeFormatNumberWithComma(element){
+    var inputValue = $(element).val();
+    // Pastikan input adalah angka yang valid atau kosong
+    if (isNaN(inputValue.replace(/\./g, '').replace(',', '.'))) {
+        $(element).val(0);  // Kosongkan input jika bukan angka valid
+    } else {
+        var formattedValue = formatNumberWithComma(inputValue);  // Format dengan fungsi
+        $(element).val(formattedValue);  // Set kembali nilai yang terformat ke input
+    }
 }
 
 
@@ -917,3 +1004,69 @@ function appendMessageAPIConnect(response){
     $('#responseTotalData').html('').html(response.total_data);
     $('#responseMessage').html('').html(JSON.stringify(response.message, null, 2));
 }
+
+
+//===========CONFIRMATION DIALOG===========//
+    //adjust from kovaln
+    //how to use
+    // $('#formPartialSudahSpk, #formPartialVoidIndent').on('submit', function(e) {
+    //     e.preventDefault();
+    //     showConfirmationDialog($(this));
+    // });
+function showConfirmationDialog($form) {
+    var config = {
+        url: $form.data('url'),
+        formID: $form.attr('id'),
+        confirmText: $form.data('partial'),
+        description: $form.data('description'),
+        requirement: $form.data('requirement'),
+        alertColor: $form.data('alert-color') || 'warning'
+    };
+    $.confirm({
+        title: config.confirmText,
+        columnClass: 'col-md-8',
+        content: buildDialogContent(config),
+        buttons: {
+            formSubmit: {
+                text: 'Submit',
+                btnClass: 'btn-blue',
+                action: function() {
+                    var name = this.$content.find('.name').val();
+                    if (!name) {
+                        $.alert('Keterangan/Referensi Harus Diisi');
+                        return false;
+                    }
+                    $(`#${config.formID} input[name="description"]`).val(name);
+                    ajaxFormSubmit(config.url, config.formID);
+
+                    // return handleFormSubmission(this, config);
+                }
+            },
+            cancel: function() {
+                //close
+            },
+        },
+        onContentReady: function() {
+            this.$content.find('form').on('submit', function(e) {
+                e.preventDefault();
+                this.$$formSubmit.trigger('click');
+            });
+        }
+    });
+}
+
+function buildDialogContent(config) {
+    return `
+            <div class="form-group">
+                <div class="alert alert-${config.alertColor}">
+                    ${config.description}
+                </div>
+                <label>${config.requirement}</label>
+                <input type="text" 
+                       placeholder="Keterangan/Referensi" 
+                       name="keterangan" 
+                       class="name form-control" 
+                       required />
+            </div>`;
+}
+//===========END CONFIRMATION DIALOG===========//
