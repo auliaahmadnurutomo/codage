@@ -13,7 +13,7 @@ function initializeAutocomplete(configs, onSelect, appendToView,csrfToken) {
             // console.log("Focused on: " + config.inputSelector);
         });
 
-        $(config.inputSelector).on('blur', function () {
+        $(config.inputSelector).on('input', function () {
             console.log("value selected on blur: " + $(config.inputSelector).val());
             if ($(appendToView + " #" + config.inputSelector.substring(1) + "_select").val() === '') {
                 $('#no-results-' + config.inputSelector.substring(1)).show()
@@ -21,6 +21,7 @@ function initializeAutocomplete(configs, onSelect, appendToView,csrfToken) {
             }
             if ($(config.inputSelector).val() === '') {
                 $('#no-results-' + config.inputSelector.substring(1)).hide()
+                $(appendToView + " #" + config.inputSelector.substring(1) + "_select").val('');
             }
         });
         $(config.inputSelector).autocomplete({
@@ -144,5 +145,3 @@ function appendValidIcon(idGroup) {
     $('#no-results-' + idGroup).hide();
 
 }
-
-
