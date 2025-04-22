@@ -27,9 +27,9 @@ class {{ $file }}ListView extends {{ $file }}Controller implements DefaultFactor
     function tableHeader(){
     	return [
     		//nama kolom & label untuk header tabel
-    		["col" => "name","title"=>"Name","first"=>1,"mw"=>200],
-            ["col" => "code","title"=>"Code","first"=>0,"mw"=>150],
-            ["col" => "status","title"=>"Status","first"=>0]
+    		["orderBy"=>"name","col" => "name","title"=>"Name","first"=>1,"mw"=>200],
+            ["orderBy"=>"code","col" => "code","title"=>"Code","first"=>0,"mw"=>150],
+            ["orderBy"=>"status","col" => "status","title"=>"Status","first"=>0]
     	];
     }
 

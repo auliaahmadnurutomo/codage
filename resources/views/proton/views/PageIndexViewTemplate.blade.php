@@ -34,7 +34,7 @@
     <tr class="border-bottom">
         <th>No</th>
         @foreach ($table_header as $header)
-            <x-th col="{{ @$header['col'] }}" title="{{ @$header['title'] }}" first="{{ @$header['first'] }}" mw="{{ isset($header['mw']) ? $header['mw'] : '200' }}px" static="{{ isset($header['static']) ? $header['static'] : false }}"></x-th>
+            <x-th col="{{ @$header['orderBy'] }}" title="{{ @$header['title'] }}" first="{{ @$header['first'] }}" mw="{{ isset($header['mw']) ? $header['mw'] : '200' }}px" static="{{ isset($header['static']) ? $header['static'] : false }}"></x-th>
         @endforeach
         <th colspan="2" class="text-center"># </th>
     </tr>
