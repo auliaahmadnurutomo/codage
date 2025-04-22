@@ -2,20 +2,20 @@
 @section('content')
     <div class="d-flex justify-content-between d-md-none py-4">
         <div class="row col">
-            <div class="mb-0 font-weight-bold">{{ $section }}</div>
+            <h5 class="text-center text-md-left mb-0 font-weight-bold">{{ $section }}</h5>
         </div>
 
-        <div class="text-right">
+        <div class="row col align-item-center justify-content-end">
             <button class="bg-light rounded-circle border border-lg text-muted ml-2" type="button" data-toggle="collapse"
                 data-target="#collapse-filter" aria-expanded="false" aria-controls="collapse-filter">
                 <i class="fa fa-ellipsis-h"></i>
             </button>
         </div>
     </div>
-
-    <div id="page-header" class="justify-content-between d-none d-md-flex align-items-center mb-4 pt-4">
+    @yield('tabNav')
+    <div id="page-header" class="justify-content-between d-none d-md-flex align-items-center p-3">
         <div>
-            <h5 class="text-center text-md-left mb-0 text-muted">{{ $section }}</h5>
+            <h5 class="text-center text-md-left mb-0 font-weight-bold text-muted">{{ $section }}</h5>
         </div>
         @yield('shortcut')
     </div>
@@ -23,7 +23,6 @@
 
         <div class="collapse dont-collapse-sm" id="collapse-filter">
             <div class="card border-0">
-                <div class="d-block d-md-none mt-3">@yield('shortcut')</div>
                 @include('layouts.page-index.filter_new')
             </div>
         </div>

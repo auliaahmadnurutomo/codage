@@ -33,11 +33,24 @@
     @if(@$table_header)
     <tr class="border-bottom">
         <th>No</th>
-        @foreach ($table_header as $header)
-            <x-th col="{{ @$header['orderBy'] }}" title="{{ @$header['title'] }}" first="{{ @$header['first'] }}" mw="{{ isset($header['mw']) ? $header['mw'] : '200' }}px" static="{{ isset($header['static']) ? $header['static'] : false }}"></x-th>
+        @foreach ($table_header as $key => $header)
+            <x-th col="{{ @$header['col'] }}" title="{{ @$header['title'] }}" first="{{ @$header['first'] }}" mw="{{ isset($header['mw']) ? $header['mw'] : '200' }}px" static="{{ isset($header['static']) ? $header['static'] : false }}"></x-th>
+            @if(isset($header['toggleable'] ) && $header['toggleable'] == true)
+               @php
+                $columnOptions[$key+1] = $header['title'];
+                @endphp
+            @endif
         @endforeach
-        <th colspan="2" class="text-center"># </th>
     </tr>
     @endif
 @endsection
 
+@section('addJs')
+<script src="{{ asset('theme/js/adjust-column-table.js') }}"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        // Initialize table column manager
+        const columnManager = new TableColumnManager('dataTable', '{{$controller_path}}_columnStates');
+    });
+</script>
+@endsection
