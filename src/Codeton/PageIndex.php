@@ -82,8 +82,18 @@ trait PageIndex
         $this->orderType = $this->defaultOrderType();
 
         if (isset($orderBy) && $orderBy !== '') { //tambahan untuk order data
-            if (in_array($orderBy, array_column($this->tableHeader(), 'col'))) {
-                $this->orderBy = $orderBy;
+            // if (in_array($orderBy, array_column($this->tableHeader(), 'col'))) {
+            //     $this->orderBy = $orderBy;
+            // }
+            $headers        = $this->tableHeader();
+            $matchingHeader = array_filter($headers, function ($header) use ($orderBy) {
+                return isset($header['orderBy']) && $header['orderBy'] === $orderBy;
+            });
+
+            if (! empty($matchingHeader)) {
+                // Get first matching header and its col value
+                $header        = reset($matchingHeader);
+                $this->orderBy = $header['col'];
             }
             $this->orderType = ($orderType == 'asc' ? 'asc' : 'desc');
         }
