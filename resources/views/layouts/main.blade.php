@@ -84,18 +84,18 @@
 
     }
 
-    .dropdown-menu {
+    #dropdownColumnOptions .dropdown-menu {
         min-width: 8rem;
         padding: 0.5rem 0;
     }
 
-    .dropdown-item {
+    #dropdownColumnOptions .dropdown-item {
         display: flex;
         align-items: center;
         padding: 0.25rem 1.5rem;
     }
 
-    .dropdown-item input[type="checkbox"] {
+    #dropdownColumnOptions .dropdown-item input[type="checkbox"] {
         margin-right: 0.5rem;
     }
 </style>
