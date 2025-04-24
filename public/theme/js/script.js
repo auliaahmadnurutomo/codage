@@ -30,6 +30,9 @@ function interval_reload(){
     //   }
     // }
 }
+function closeWindow(){
+    window.close();
+}
 
 function hot_reload(gotoWhere){
     $.ajax({
@@ -133,14 +136,16 @@ function store_data() //would be deprecated
 
 function ajaxSubmit(formID)
 {
+    console.log(formID);
     var formInput = $(formID);
     var btn = $('#btn-submit');
     var curr_text = btn.html();
     $('input, select').removeClass('error-input');
     $('[data-label="alert"]').html('');
     var formData = new FormData(formInput[0]);
+    
     $.ajax({
-        url: dynamic_url,
+        url: formInput.attr('action') || dynamic_url, // Use form action if exists, otherwise use dynamic_url
         type: 'POST',
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -175,7 +180,7 @@ function ajaxSubmit(formID)
                 });
             }
             else{
-                errorValidation(response)
+                errorValidation(response,formInput)
             }
             hideFullLoader();
             progressButtonEnd(btn,curr_text)
@@ -216,7 +221,7 @@ function ajaxFormSubmit(url = null,form = null) {
         $('.is-invalid').removeClass('is-invalid');
         $('.invalid-feedback').remove();
         if (data.errors) {
-            errorValidation(data);
+            errorValidation(data, formInput);
         } 
         else if ($.isEmptyObject(data.error || data.global_error)) {
             if(!$.isEmptyObject(data.jsFunction)){
@@ -238,7 +243,7 @@ function ajaxFormSubmit(url = null,form = null) {
         }
 
         else {
-            append_to_basic_error(data.error);
+            append_to_basic_error(data.error, formInput);
         }
     })
     .fail(function () {
@@ -254,6 +259,7 @@ function ajaxFormSubmit(url = null,form = null) {
 
 function ajaxModalSubmit()
 {
+    
     var formInput = $('#formData');
     var btn = $('#btn-submit');
     var curr_text = btn.html();
@@ -295,7 +301,7 @@ function ajaxModalSubmit()
                 });
             }
             else{
-                errorValidation(response)
+                errorValidation(response,formInput)
             }
             hideFullLoader();
             progressButtonEnd(btn,curr_text)
@@ -306,9 +312,10 @@ function ajaxModalSubmit()
     });
 }
 
-function errorValidation(response){
+function errorValidation(response, formID = '#formData'){
+    
     $.each(response.errors, function(key, value) {
-        var input = $('[name="' + key + '"]');
+        var input = $(formID).find('[name="' + key + '"]');
         input.addClass('is-invalid');
         if (input.is('select')) {
             input.parent().append('<div class="invalid-feedback">' + value + '</div>');
@@ -321,9 +328,6 @@ function errorValidation(response){
 
     if (typeof showToastNotif !== 'undefined') {
         $("#liveToast .toast-body").find("ul").html('');
-        $("#liveToast .toast-header").addClass('bg-danger text-white');
-        $('#liveToast .toast-header .header').html('Error Validation');
-        $("#liveToast .toast-body").addClass('alert-danger');
         $('.toast').toast('show');
         $.each(response.errors, function(key, value) {
             $("#liveToast .toast-body").find("ul").append('<li>'+value+'</li>');
@@ -335,6 +339,7 @@ function errorValidation(response){
 
 function append_to_basic_error(msg,formID = '#formData')
 {
+    console.log(formID);
     var message = msg;
     for(var i = 0 ; i<message.length;i++){
         var arr = message[i].split('-@-');
@@ -342,33 +347,6 @@ function append_to_basic_error(msg,formID = '#formData')
         $(formID+' .form-group').find('#'+arr[0]).html(arr[1]);
     }
 }
-
-// function append_to_basic_error(msg, formID = '#formData') {
-//     var message = msg;
-    
-//     // Handle form error indicators
-//     for(var i = 0; i < message.length; i++) {
-//         var arr = message[i].split('-@-');
-//         document.getElementsByName(arr[0])[0].className += ' error-input';
-//         $(formID + ' .form-group').find('#' + arr[0]).html(arr[1]);
-//     }
-
-//     // Display errors in toast if toast functionality exists
-//     if (typeof showToastNotif !== 'undefined') {
-//         $("#liveToast .toast-body").find("ul").html('');
-//         $("#liveToast .toast-header").addClass('bg-danger text-white');
-//         $('#liveToast .toast-header .header').html('Error Validation');
-//         $("#liveToast .toast-body").addClass('alert-danger');
-        
-//         for(var i = 0; i < message.length; i++) {
-//             var arr = message[i].split('-@-');
-//             $("#liveToast .toast-body").find("ul").append('<li>' + arr[1] + '</li>');
-//         }
-        
-//         $('.toast').toast('show');
-//     }
-// }
-
 function orderData(orderBy,orderType)
 {
     var url        = window.location.href;
@@ -405,6 +383,7 @@ $("#modalForm").on("show.bs.modal", function(e) {
             van_modal();
         }
     });
+    hideFullLoader();
 });
 
 
@@ -434,14 +413,9 @@ function initOldDateRange(fromOld,toOld,max){
         changeMonth: true,
         changeYear: true,
         onSelect: function onSelect(dateStr) {
-            var maxDate = $(this).datepicker('getDate'); // Get selected date
+            var max = $(this).datepicker('getDate'); // Get selected date
 
-            $(toOld).datepicker('option', 'minDate', maxDate || '0'); // Set other max, default to today
-            if(max){
-                var minDate = new Date(maxDate.valueOf());
-                minDate.setDate(minDate.getDate() + max);
-                $(toOld).datepicker('option', 'maxDate', minDate);
-            }
+            $(toOld).datepicker('option', 'minDate', max || '0'); // Set other max, default to today
         },
         onClose: function onClose() {
             $(toOld).focus();
@@ -453,8 +427,7 @@ function initOldDateRange(fromOld,toOld,max){
         changeMonth: true,
         changeYear: true,
         onSelect: function onSelect(dateStr) {
-            
-            // var start = $(fromOld).datepicker("getDate");
+            var start = $(fromOld).datepicker("getDate");
             var end = $(toOld).datepicker("getDate");
             var rawStart = $(fromOld).val();
             var rawEnd = $(toOld).val();
@@ -462,7 +435,6 @@ function initOldDateRange(fromOld,toOld,max){
             if (rawStart == rawEnd) {
                 end = end.setDate(end.getDate() + 1);
             }
-            
         }
     });
 }
@@ -498,66 +470,6 @@ function initNewDateRange(fromNew,toNew,set31=false){
         changeYear: true,
     });
 
-}
-
-//hanya untuk positif
-function formatThousandSeparator(value) {
-    // Remove non-numeric characters except dots
-    let numericValue = value.toString().replace(/[^\d]/g, '');
-    
-    // Format with thousand separator if value exists
-    if (numericValue) {
-        return parseInt(numericValue).toLocaleString('id-ID');
-    }
-    // return '';
-    return 0;
-}
-
-// Fungsi untuk format angka dengan titik sebagai pemisah ribuan
-function formatNumberWithComma(number) {
-    if (number == null || number === '') {
-        return '';  // Kembalikan string kosong jika input null atau empty
-    }
-
-    var isNegative = number[0] === '-';
-    if (isNegative) {
-        number = number.substring(1);  // Hapus tanda minus untuk sementara
-    }
-
-    // Hapus semua karakter yang bukan angka atau koma
-    number = number.toString().replace(/[^\d]/g, '');  // Hapus semua karakter non-angka
-
-    // Pisahkan angka desimal (jika ada)
-    var parts = number.split(',');  // Misalnya "1000,50" => ["1000", "50"]
-
-    // Format bagian ribuan
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");  // Format ribuan dengan titik
-
-    if (isNegative) {
-        formattedNumber = '-' + formattedNumber;
-        // formattedNumber = '0';
-    }
-    // Gabungkan kembali bagian ribuan dan desimal (jika ada)
-    return parts.join(',');
-}
-
-function removeNumberSeparator(number) {
-    if (number == null || number === '') {
-        return 0; // Kembalikan string kosong jika number null, undefined, atau kosong
-    }
-    // return number.replace(/\./g, '');
-    return number.toString().replace(/\./g, '');  // Menghapus titik
-}
-
-function onChangeFormatNumberWithComma(element){
-    var inputValue = $(element).val();
-    // Pastikan input adalah angka yang valid atau kosong
-    if (isNaN(inputValue.replace(/\./g, '').replace(',', '.'))) {
-        $(element).val(0);  // Kosongkan input jika bukan angka valid
-    } else {
-        var formattedValue = formatNumberWithComma(inputValue);  // Format dengan fungsi
-        $(element).val(formattedValue);  // Set kembali nilai yang terformat ke input
-    }
 }
 
 
@@ -603,14 +515,16 @@ $(document).on("click","#btn-action", function(e){
     var state = $(this).data('state');
     var title = $(this).attr('title');
     var func = $(this).data('func');
-    var url = controller_path+'/'+func;
+    var fullUrl = $(this).data('url');
+    var url = fullUrl ?? controller_path+'/'+func;
+    var content = $(this).data('content') ?? 'Are you sure to continue ?';
 
     $.confirm({
         theme: 'bootstrap',
         type: 'default',
         icon: 'fa fa-warning',
         title: title,
-        content: 'Are you sure to continue ?',
+        content: content,
         draggable: false,
         buttons: {
             confirm: {
@@ -664,28 +578,24 @@ $(document).on("click","#btn-action", function(e){
     });
 });
 
-$(document).on("click","#btn-action-confirm", function(){
-    // e.preventDefault();
+$(document).on("click","#btn-action-confirm", function(e){
+    e.preventDefault();
     var id = $(this).data('id');
     var state = $(this).data('state');
     var title = $(this).attr('title');
     var func = $(this).data('func');
-    var mandatory = $(this).data('mandatory');
     var url = controller_path+'/'+func;
     var placeHolderContent = $(this).data('placeholder');
-    var required = mandatory ? 'required' : '';
-
     $.confirm({
         theme: 'bootstrap',
         type: 'default',
         icon: 'fa fa-warning',
         title: title,
         content: '' +
-            '<form>' +
+            '<form action="" class="formName">' +
             '<div class="form-group">' +
-            '<hr>'+
-            '<label class="text-center">Notes</label>' +
-            '<input type="text" placeholder="'+placeHolderContent+'" class="msgContent form-control" '+required+' />' +
+            '<label>Message content required</label>' +
+            '<input type="text" placeholder="'+placeHolderContent+'" class="msgContent form-control" required />' +
             '</div>' +
             '</form>',
         draggable: false,
@@ -695,13 +605,11 @@ $(document).on("click","#btn-action-confirm", function(){
                 btnClass: 'btn-blue',
                 action: function action() {
                     var msgContent = this.$content.find('.msgContent').val();
-                    if(required){
-                        if(!msgContent){
-                            $.alert('Message content required');
-                            return false;
-                        }
+                    if(!msgContent){
+                        $.alert('Message content required');
+                        return false;
                     }
-                    
+
                     showFullLoader();
                     var data = {};
                     data['data0'] = $("#current_url").html();
@@ -746,15 +654,6 @@ $(document).on("click","#btn-action-confirm", function(){
             cancel: {
                 text: 'No'
             }
-        },
-        onContentReady: function () {
-            // bind to events
-            var jc = this;
-            this.$content.find('form').on('submit', function (e) {
-                // if the user submits the form by pressing enter in the field.
-                e.preventDefault();
-                // jc.$$formSubmit.trigger('click'); // reference the button and click it
-            });
         }
     });
 });
@@ -979,7 +878,7 @@ function changeSearchPlaceholder(){
     // alert(selectedOption.text)
     var input = document.getElementById("stringToSearch");
     input.placeholder = "Placeholder Baru";
-    input.placeholder = 'Search For '+selectedOption.text;
+    input.placeholder = 'Cari '+selectedOption.text;
 }
 
 function reset_nav(){
@@ -1004,69 +903,3 @@ function appendMessageAPIConnect(response){
     $('#responseTotalData').html('').html(response.total_data);
     $('#responseMessage').html('').html(JSON.stringify(response.message, null, 2));
 }
-
-
-//===========CONFIRMATION DIALOG===========//
-    //adjust from kovaln
-    //how to use
-    // $('#formPartialSudahSpk, #formPartialVoidIndent').on('submit', function(e) {
-    //     e.preventDefault();
-    //     showConfirmationDialog($(this));
-    // });
-function showConfirmationDialog($form) {
-    var config = {
-        url: $form.data('url'),
-        formID: $form.attr('id'),
-        confirmText: $form.data('partial'),
-        description: $form.data('description'),
-        requirement: $form.data('requirement'),
-        alertColor: $form.data('alert-color') || 'warning'
-    };
-    $.confirm({
-        title: config.confirmText,
-        columnClass: 'col-md-8',
-        content: buildDialogContent(config),
-        buttons: {
-            formSubmit: {
-                text: 'Submit',
-                btnClass: 'btn-blue',
-                action: function() {
-                    var name = this.$content.find('.name').val();
-                    if (!name) {
-                        $.alert('Keterangan/Referensi Harus Diisi');
-                        return false;
-                    }
-                    $(`#${config.formID} input[name="description"]`).val(name);
-                    ajaxFormSubmit(config.url, config.formID);
-
-                    // return handleFormSubmission(this, config);
-                }
-            },
-            cancel: function() {
-                //close
-            },
-        },
-        onContentReady: function() {
-            this.$content.find('form').on('submit', function(e) {
-                e.preventDefault();
-                this.$$formSubmit.trigger('click');
-            });
-        }
-    });
-}
-
-function buildDialogContent(config) {
-    return `
-            <div class="form-group">
-                <div class="alert alert-${config.alertColor}">
-                    ${config.description}
-                </div>
-                <label>${config.requirement}</label>
-                <input type="text" 
-                       placeholder="Keterangan/Referensi" 
-                       name="keterangan" 
-                       class="name form-control" 
-                       required />
-            </div>`;
-}
-//===========END CONFIRMATION DIALOG===========//
