@@ -1,60 +1,90 @@
 <?php
+
 namespace App\Codeton;
 
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
+/**
+ * Trait SimpleAction
+ * 
+ * Provides simple CRUD action functionality
+ */
 trait SimpleAction
 {
-    public function Simple_action_toggle($request, $data_update)
+    /**
+     * Toggle action with database update
+     *
+     * @param Request $request The HTTP request
+     * @param array $dataUpdate Data to update
+     * @return Response HTTP response
+     */
+    public function simpleActionToggle(Request $request, array $dataUpdate): Response
     {
-        $reload_path = $request->session()->get($this->controller_path);
-        $view_response = 'response/success_reload_div';
+        $reloadPath = $request->session()->get($this->controller_path);
+        $viewResponse = 'response/success_reload_div';
         $message = 'Success Update';
+        
         try {
-            if (!$this->query->update($data_update)) {
+            if (!$this->query->update($dataUpdate)) {
                 $message = 'Data not modified';
             }
-        } catch (Exception $ex) {
+        } catch (Exception $exception) {
             $message = 'Error during update, please reload page';
-            $view_response = 'response/error_reload_full';
+            $viewResponse = 'response/error_reload_full';
         }
-        $path = $reload_path == '' ? $this->controller_path : $reload_path;
-        return $this->Return_response($message, $view_response, $path);
+        
+        $path = $reloadPath ?: $this->controller_path;
+        return $this->returnResponse($message, $viewResponse, $path);
     }
 
-    public function Simple_action_delete($request)
+    /**
+     * Delete action
+     *
+     * @param Request $request The HTTP request
+     * @return Response HTTP response
+     */
+    public function simpleActionDelete(Request $request): Response
     {
-        $reload_path = $request->session()->get($this->controller_path);
-        $view_response = 'response/success_reload_div';
+        $reloadPath = $request->session()->get($this->controller_path);
+        $viewResponse = 'response/success_reload_div';
         $message = 'Success Delete Data';
+        
         try {
             if (!$this->query->delete()) {
                 $message = 'Failed delete data';
-                $view_response = 'response/error_reload_full';
+                $viewResponse = 'response/error_reload_full';
             }
-        } catch (Exception $ex) {
+        } catch (Exception $exception) {
             $message = 'Failed delete data, invalid code';
-            $view_response = 'response/error_reload_full';
+            $viewResponse = 'response/error_reload_full';
         }
-        $path = $reload_path == '' ? $this->controller_path : $reload_path;
-        return $this->Return_response($message, $view_response, $path);
+        
+        $path = $reloadPath ?: $this->controller_path;
+        return $this->returnResponse($message, $viewResponse, $path);
     }
 
-    public function DeleteThenReloadJs($request)
+    /**
+     * Delete and reload with JavaScript
+     *
+     * @param Request $request The HTTP request
+     * @return Response HTTP response
+     */
+    public function deleteThenReloadJs(Request $request): Response
     {
-        $view_response = 'response/success_reload_js';
+        $viewResponse = 'response/success_reload_js';
         $message = 'Success Delete Data';
+        
         try {
             if (!$this->query->delete()) {
                 $message = 'Failed delete data';
             }
-        } catch (Exception $ex) {
+        } catch (Exception $exception) {
             $message = 'Failed delete data, invalid code';
-            $view_response = 'response/error_reload_js';
+            $viewResponse = 'response/error_reload_js';
         }
-
-        $data['message'] = $message;
-        return $this->Return_response($message, $view_response);
+        
+        return $this->returnResponse($message, $viewResponse);
     }
-
 }
