@@ -257,7 +257,7 @@
             Speed: 200,
             autostart: true,
             autohide: true,
-            linkActive: '{{ @$controller_path }}'
+            linkActive:'{{@$activeMenu ?? @$controller_path}}'
         });
 
         // $('.toast').toast('show');
