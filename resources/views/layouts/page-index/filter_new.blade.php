@@ -35,7 +35,7 @@
         <button class="btn btn-light border" data-toggle="modal" data-target="#side-filter"><i class="fa fa-filter fa-xs mr-1 text-primary"></i></button>
         @endif
         @if(isset($columnOptions))
-        <div class="dropdown ml-2">
+        <div id="dropdownColumnOptions" class="dropdown ml-2">
           <button class="btn btn-light border dropdown-toggle" type="button" id="dropdownColumns" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-list"></i>
           </button>

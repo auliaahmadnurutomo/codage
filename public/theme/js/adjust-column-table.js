@@ -9,7 +9,7 @@ class TableColumnManager {
         // Wait for document ready
         $(document).ready(() => {
             // Initialize dropdown
-            $('.dropdown-toggle').dropdown();
+            $('#dropdownColumnOptions .dropdown-toggle').dropdown();
 
             // Load saved states first
             this.loadColumnState();
@@ -24,7 +24,7 @@ class TableColumnManager {
 
     bindEvents() {
         // Handle checkbox changes
-        $('.dropdown-menu input[type="checkbox"]').on('change', (e) => {
+        $('#dropdownColumnOptions .dropdown-menu input[type="checkbox"]').on('change', (e) => {
             const column = $(e.target).data('column');
             const isChecked = $(e.target).prop('checked');
             this.toggleColumn(column, isChecked);
@@ -33,14 +33,14 @@ class TableColumnManager {
         });
 
         // Keep dropdown open when clicking inside
-        $('.dropdown-menu').on('click', (e) => {
+        $('#dropdownColumnOptions .dropdown-menu').on('click', (e) => {
             e.stopPropagation();
         });
     }
 
     saveColumnState() {
         const columnStates = {};
-        $('.dropdown-menu input[type="checkbox"]').each(function(){
+        $('#dropdownColumnOptions .dropdown-menu input[type="checkbox"]').each(function(){
             const column = $(this).data('column');
             columnStates[column] = $(this).prop('checked');
         });
@@ -52,7 +52,7 @@ class TableColumnManager {
         const savedStates = localStorage.getItem(this.pageKey);
         if (savedStates) {
             const columnStates = JSON.parse(savedStates);
-            $('.dropdown-menu input[type="checkbox"]').each((index, element) => {
+            $('#dropdownColumnOptions .dropdown-menu input[type="checkbox"]').each((index, element) => {
                 const column = $(element).data('column');
                 if (columnStates.hasOwnProperty(column)) {
                     $(element).prop('checked', columnStates[column]);
@@ -65,12 +65,12 @@ class TableColumnManager {
 
     resetColumnState() {
         localStorage.removeItem(this.pageKey);
-        $('.dropdown-menu input[type="checkbox"]').prop('checked', true);
+        $('#dropdownColumnOptions .dropdown-menu input[type="checkbox"]').prop('checked', true);
         this.initializeColumnVisibility();
     }
 
     initializeColumnVisibility() {
-        $('.dropdown-menu input[type="checkbox"]').each((index, element) => {
+        $('#dropdownColumnOptions .dropdown-menu input[type="checkbox"]').each((index, element) => {
             const column = $(element).data('column');
             const isChecked = $(element).prop('checked');
             this.toggleColumn(column, isChecked);
@@ -102,7 +102,7 @@ class TableColumnManager {
         const table = $(`#${this.tableId}`);
         if (table.length === 0) return; // Exit if table not found
 
-        $('.dropdown-menu input[type="checkbox"]').each((index, element) => {
+        $('#dropdownColumnOptions .dropdown-menu input[type="checkbox"]').each((index, element) => {
             const column = $(element).data('column');
             const isChecked = $(element).prop('checked');
             
