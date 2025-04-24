@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Codeton\GenerateMenuSidebar;
 use App\Helpers\Utility;
+use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -298,7 +299,8 @@ class ProtonGenerate extends Command
             'url' => $newMenu,
             'icon' => 'far fa-square',
             'sess_name' => $newMenu,
-            'access' => 1
+            'access' => 1,
+            'uuid' => Str::uuid(),
         ];
         DB::table('skeleton_setting_menu_access')->insert($dataInsert);
         $menu_access = DB::table('skeleton_setting_menu_access')->orderBy('menu_order')->get();
