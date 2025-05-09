@@ -4,7 +4,7 @@ namespace App\Helpers;
 use Maatwebsite\Excel\Facades\Excel;
 class ExcelHelper {
 
-    public static function DownloadTemplate($headers)
+    public static function downloadTemplate($headers)
     {
         // $data = [
         //     ['No', 'Kode MK', 'Nama MK', 'Kelas', 'NIP', 'Nama', 'Paralel'],

@@ -1,11 +1,26 @@
 <?php
+
 namespace App\Helpers;
 
-use DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
 
-class Utility {
-    public static function password_check($password) {
-        $blacklist_password = [
+/**
+ * Class Utility
+ * 
+ * Utility helper class for common operations
+ */
+class Utility
+{
+    /**
+     * Check if password is in blacklist
+     *
+     * @param string $password Password to check
+     * @return bool True if password is blacklisted
+     */
+    public static function checkPassword(string $password): bool
+    {
+        $blacklistPasswords = [
             '12345678',
             'ABCDEFGH',
             'QWERTYUIOP',
@@ -16,63 +31,80 @@ class Utility {
             'PASSWORD123',
             '1234567890',
         ];
-        if(
-            in_array(strtoupper($password), $blacklist_password) ||
-            in_array(strtoupper(strrev($password)), $blacklist_password)
-        ) {
-            return true;
-        }
-        return false;
+
+        $upperPassword = strtoupper($password);
+        return in_array($upperPassword, $blacklistPasswords) ||
+               in_array(strrev($upperPassword), $blacklistPasswords);
     }
 
-    public static function fdate($date, $format = 'd-m-Y H:i:s') {
+    /**
+     * Format date to specified format
+     *
+     * @param string $date Date string to format
+     * @param string $format Output date format
+     * @return string Formatted date
+     */
+    public static function formatDate(string $date, string $format = 'd-m-Y H:i:s'): string
+    {
         return date($format, strtotime($date));
     }
 
-    public static function generate_code($table, $column, $length = 4) {
+    /**
+     * Generate unique random code
+     *
+     * @param string $table Database table name
+     * @param string $column Column name to check uniqueness
+     * @param int $length Length of generated code
+     * @return string Generated unique code
+     */
+    public static function generateCode(string $table, string $column, int $length = 4): string
+    {
         $characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
         $randomString = '';
 
-        for($i = 0; $i < $length; $i++) {
-            $index = rand(0, strlen($characters) - 1);
+        for ($i = 0; $i < $length; $i++) {
+            $index = random_int(0, strlen($characters) - 1);
             $randomString .= $characters[$index];
         }
-        if(DB::table($table)->where($column, $randomString)->first()) {
-            self::generate_code($table, $column, $length);
+
+        if (DB::table($table)->where($column, $randomString)->exists()) {
+            return self::generateCode($table, $column, $length);
         }
 
         return $randomString;
     }
 
-    static function toCamelCase($input) {
-        // Pisahkan string menjadi array kata
+    /**
+     * Convert string to camelCase
+     *
+     * @param string $input Input string
+     * @return string Converted camelCase string
+     */
+    public static function toCamelCase(string $input): string
+    {
         $words = explode(' ', $input);
-
-        // Ubah setiap kata menjadi camel case
-        $camelCaseWords = array_map(function ($word) {
+        
+        $camelCaseWords = array_map(function (string $word): string {
             return lcfirst(ucwords($word));
         }, $words);
 
-        // Gabungkan kembali kata-kata yang telah diubah menjadi camel case
-        $camelCaseString = implode('', $camelCaseWords);
-
-        return $camelCaseString;
+        return implode('', $camelCaseWords);
     }
 
-
-    static function uploadFile($folder="file",$file) {
-        $imageName = time().'-.'.$file->extension();
-        $file->move(public_path('storage/'.$folder.'/'), $imageName);
-        $imagePath = 'storage/'.$folder.'/'.$imageName;
-        return $imagePath;
-
-        // if ($request->file('image')) {
-        //     $imageName = time() . '-image.' . $request->image->extension();
-        //     $uploadedImage = $request->image->move(public_path('storage/web_photos/'), $imageName);
-        //     $imagePath = 'storage/web_photos/' . $imageName;
-        //     $data['image'] = $imagePath;
-        // }
-
+    /**
+     * Upload file to public storage
+     *
+     * @param UploadedFile $file File to upload
+     * @param string $folder Target folder in storage
+     * @return string File path relative to public directory
+     */
+    public static function uploadFile(UploadedFile $file, string $folder = 'file'): string
+    {
+        $fileName = time() . '.' . $file->getClientOriginalExtension();
+        $uploadPath = "storage/{$folder}";
+        
+        $file->move(public_path($uploadPath), $fileName);
+        
+        return "{$uploadPath}/{$fileName}";
     }
-
 }
