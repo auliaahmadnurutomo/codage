@@ -3,159 +3,277 @@
 namespace App\Http\Controllers\setting\SettingOffice;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Codeton;
 use App\Helpers\Logger;
 use Exception;
-use Validator;
-use DB;
-use Auth;
-use View;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use App\Http\Controllers\setting\SettingOffice\SettingOfficeListView as DataList;
 
+/**
+ * Class SettingOfficeController
+ * 
+ * Handles office settings management
+ */
 class SettingOfficeController extends Codeton
 {
-    protected $view_folder = 'setting/SettingOffice'; //editable, lokasi folder view
-    protected $main_table = 'skeleton_setting_office'; //optional
-    protected $controller_path = 'settingOffice';
-    private $id;
-    protected $logger;
+    /**
+     * View folder path
+     *
+     * @var string
+     */
+    protected string $viewFolder = 'setting/SettingOffice';
 
+    /**
+     * Main database table
+     *
+     * @var string
+     */
+    protected string $mainTable = 'skeleton_setting_office';
+
+    /**
+     * Controller path
+     *
+     * @var string
+     */
+    protected string $controllerPath = 'settingOffice';
+
+    /**
+     * Current record ID
+     *
+     * @var int|null
+     */
+    private ?int $id = null;
+
+    /**
+     * Logger instance
+     *
+     * @var Logger
+     */
+    protected Logger $logger;
+
+    /**
+     * Constructor
+     *
+     * @param Request $request
+     * @param Logger $logger
+     */
     public function __construct(Request $request, Logger $logger)
     {
         $this->logger = $logger;
         View::share([
-            'controller_path' => $this->controller_path,
+            'controller_path' => $this->controllerPath,
         ]);
     }
 
-    public function PageIndex(Request $request)
+    /**
+     * Display index page
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function pageIndex(Request $request)
     {
-        if (!$this->acl($this->controller_path)) {
+        if (!$this->acl($this->controllerPath)) {
             abort(401);
         }
+        
         $list = new DataList(request: $request);
-        return $list->TableView();
+        return $list->tableView();
     }
 
-    public function Activation(Request $request)
+    /**
+     * Toggle activation status
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function activation(Request $request): Response
     {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
             abort(401);
         }
+
         $status = ($request->get('data3')) ? 0 : 1;
-        $data_update = array('status' => $status);
+        $dataUpdate = ['status' => $status];
+        $id = $request->get('data2');
+
+        if (!$id) {
+            return $this->returnResponse('Payload error', 'response/error_reload_full');
+        }
+
+        $this->query = DB::table($this->mainTable)->where('uuid', $id);
+        return $this->simpleActionToggle($request, $dataUpdate);
+    }
+
+    /**
+     * Delete a record
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function delete(Request $request): Response
+    {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
+            abort(401);
+        }
+
         $id = $request->get('data2');
         if (!$id) {
-            return $this->Return_response('Payload error', 'response/error_reload_full');
+            return $this->returnResponse('Payload error', 'response/error_reload_full');
         }
-        $this->query = DB::table($this->main_table)->where('uuid', $id);
-        return $this->Simple_action_toggle($request, $data_update); //editable table
+
+        $this->query = DB::table($this->mainTable)->where('uuid', $id);
+        return $this->simpleActionDelete($request);
     }
 
-    public function Delete(Request $request)
+    /**
+     * Show create form
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function create(Request $request)
     {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
             abort(401);
         }
-        $id = $request->get('data2');
-        if (!$id) {
-            return $this->Return_response('Payload error', 'response/error_reload_full');
-        }
-        $this->query = DB::table($this->main_table)->where('uuid', $id);
-        return $this->Simple_action_delete($request); //editable table
+
+        return view($this->viewFolder . '.form', ['type' => 'create']);
     }
 
-    public function Create(Request $request)
+    /**
+     * Store a new record
+     *
+     * @param Request $request
+     * @return Response|\Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
     {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
             abort(401);
         }
-        $data['type'] = 'create';
-        return view($this->view_folder . '.form', $data);
-    }
 
-    public function Store(Request $request)
-    {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
-            abort(401);
-        }
         $validator = Validator::make($request->all(), [
-            //validasi input store disini
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:' . $this->mainTable
         ]);
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()]);
         }
-        try {
-            $uuid = Str::uuid();
-            //DB::beginTransaction();
-            $data_insert = array(
-                // 'uuid'            => $uuid,
-                'id_corporate' => 1, //dev
-                'name'            => $request->input('name'),
-                'code'            => $request->input('code'),
-                'id_user_insert'  => Auth::user()->id,
-                //'id_user_update'  => Auth::user()->id,
-            );
-            DB::table($this->main_table)->insert($data_insert);
-            //log data insert
-            //DB::commit();
-        } catch (Exception $e) {
-            //DB::rollback();
-            //log jika error
-            $this->logger->error($e);
-            return $this->Return_response('Error during insert', 'response/error_reload_full');
-        }
-        //log kalau sukses
-        //return $this->Return_response('Update Successfull','response/success_reload_js');
-        return $this->Return_response('Insert Successfull', 'response/success_reload_div', $request->session()->get($this->controller_path));
-    }
 
-
-    public function Edit(Request $request)
-    {
-        if(!$this->acl($this->controller_path)){abort(401);}
-        try {
-            $id = $request->id;
-            // $data['results'] = DB::table($this->main_table)->where('uuid','=',$id)->first(); //editable
-            $data['results'] = DB::table($this->main_table)->where('id','=',$id)->first(); //editable
-            !$data['results'] ? abort(404) : true;
-            $data['type'] = "edit";
-            //add another datas for edit view
-            return view($this->view_folder.'.form', $data);
-        } catch (Exception $e) {
-            return redirect($this->controller_path);
-        }
-    }
-
-    public function Update(Request $request){
-        if(!$request->ajax() || !$this->acl($this->controller_path)){abort(401);}
-        $id = $request->post('id_reference');
-        $validator = Validator::make($request->all(), [
-            //validasi input store disini
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()]);
-        }
         try {
             DB::beginTransaction();
-            $data_update = array(
-                'name'            => $request->input('name'),
-                'code'            => $request->input('code'),
-            );
-            // $affectedRows = DB::table($this->main_table)->where('uuid',$id)->update($data_update);
-            $affectedRows = DB::table($this->main_table)->where('id',$id)->update($data_update);
-            //log data update
+            
+            $dataInsert = [
+                'id_corporate' => 1,
+                'name' => $request->input('name'),
+                'code' => $request->input('code'),
+                'id_user_insert' => Auth::id(),
+            ];
+
+            DB::table($this->mainTable)->insert($dataInsert);
             DB::commit();
+
+            return $this->returnResponse(
+                'Insert Successful',
+                'response/success_reload_div',
+                $request->session()->get($this->controllerPath)
+            );
         } catch (Exception $e) {
             DB::rollback();
-            //log jika error
             $this->logger->error($e);
-            return $this->Return_response('Error during update','response/error_reload_js');
+            return $this->returnResponse(
+                'Error during insert: ' . $e->getMessage(),
+                'response/error_reload_full'
+            );
         }
-        //log kalau sukses
-        //return $this->Return_response('Update Successfull','response/success_reload_js');
-        return $this->Return_response($affectedRows ? 'Update Successfull' : 'Nothing to update','response/success_reload_div',$request->session()->get($this->controller_path));
     }
-    
+
+    /**
+     * Show edit form
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function edit(Request $request)
+    {
+        if (!$this->acl($this->controllerPath)) {
+            abort(401);
+        }
+
+        try {
+            $data['results'] = DB::table($this->mainTable)
+                ->where('id', $request->id)
+                ->first();
+
+            if (!$data['results']) {
+                abort(404);
+            }
+
+            $data['type'] = 'edit';
+            return view($this->viewFolder . '.form', $data);
+        } catch (Exception $e) {
+            $this->logger->error($e);
+            return redirect($this->controllerPath);
+        }
+    }
+
+    /**
+     * Update an existing record
+     *
+     * @param Request $request
+     * @return Response|\Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request)
+    {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
+            abort(401);
+        }
+
+        $id = $request->post('id_reference');
+        
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:' . $this->mainTable . ',code,' . $id
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()]);
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            $dataUpdate = [
+                'name' => $request->input('name'),
+                'code' => $request->input('code'),
+                'id_user_update' => Auth::id(),
+            ];
+
+            $affectedRows = DB::table($this->mainTable)
+                ->where('id', $id)
+                ->update($dataUpdate);
+
+            DB::commit();
+
+            return $this->returnResponse(
+                $affectedRows ? 'Update Successful' : 'Nothing to update',
+                'response/success_reload_div',
+                $request->session()->get($this->controllerPath)
+            );
+        } catch (Exception $e) {
+            DB::rollback();
+            $this->logger->error($e);
+            return $this->returnResponse(
+                'Error during update: ' . $e->getMessage(),
+                'response/error_reload_js'
+            );
+        }
+    }
 }

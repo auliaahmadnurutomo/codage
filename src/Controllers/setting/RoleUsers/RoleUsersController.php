@@ -2,90 +2,182 @@
 
 namespace App\Http\Controllers\setting\RoleUsers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use App\Http\Controllers\Codeton;
 use App\Helpers\Logger;
-use Exception;
-use Validator;
-use DB;
-use Auth;
-use View;
 use App\Codeton\GenerateMenuSidebar;
-use App\Http\Controllers\setting\RoleUsers\RoleUsersListView as DataList;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
+use Exception;
 
+/**
+ * Class RoleUsersController
+ * 
+ * Handles role and user management operations
+ */
 class RoleUsersController extends Codeton
 {
-    protected $view_folder = 'setting/RoleUsers'; //editable, lokasi folder view
-    protected $main_table = 'skeleton_setting_menu_template'; //optional
-    protected $controller_path = 'roleUsers';
-    private $id;
-    protected $logger;
+    /**
+     * View folder path
+     *
+     * @var string
+     */
+    protected string $viewFolder = 'setting/RoleUsers';
 
+    /**
+     * Main database table
+     *
+     * @var string
+     */
+    protected string $mainTable = 'skeleton_setting_menu_template';
+
+    /**
+     * Controller path
+     *
+     * @var string
+     */
+    protected string $controllerPath = 'roleUsers';
+
+    /**
+     * Current record ID
+     *
+     * @var int|null
+     */
+    private ?int $id = null;
+
+    /**
+     * Logger instance
+     *
+     * @var Logger
+     */
+    protected Logger $logger;
+
+    /**
+     * Constructor
+     *
+     * @param Request $request
+     * @param Logger $logger
+     */
     public function __construct(Request $request, Logger $logger)
     {
         $this->logger = $logger;
         View::share([
-            'controller_path' => $this->controller_path,
+            'controller_path' => $this->controllerPath,
         ]);
     }
 
-    public function PageIndex(Request $request)
+    /**
+     * Display index page
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function pageIndex(Request $request)
     {
-        if (!$this->acl($this->controller_path)) {
+        if (!$this->acl($this->controllerPath)) {
             abort(401);
         }
+
         $list = new DataList(request: $request);
-        return $list->TableView();
+        return $list->tableView();
     }
 
-    public function Activation(Request $request)
+    /**
+     * Toggle activation status
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function activation(Request $request): Response
     {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
             abort(401);
         }
+
         $status = ($request->get('data3')) ? 0 : 1;
-        $data_update = array('status' => $status);
+        $dataUpdate = ['status' => $status];
         $id = $request->get('data2');
+
         if (!$id) {
-            return $this->Return_response('Payload error', 'response/error_reload_full');
+            return $this->returnResponse('Payload error', 'response/error_reload_full');
         }
-        $this->query = DB::table($this->main_table)->where('id', $id);
-        return $this->Simple_action_toggle($request, $data_update); //editable table
+
+        $this->query = DB::table($this->mainTable)->where('id', $id);
+        return $this->simpleActionToggle($request, $dataUpdate);
     }
 
-    public function Delete(Request $request)
+    /**
+     * Delete a record
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function delete(Request $request): Response
     {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
             abort(401);
         }
+
         $id = $request->get('data2');
+        
         if (!$id) {
-            return $this->Return_response('Payload error', 'response/error_reload_full');
+            return $this->returnResponse('Payload error', 'response/error_reload_full');
         }
-        $this->query = DB::table($this->main_table)->where('id', $id);
-        DB::table('skeleton_setting_template_access')->where('id_menu_template',$id)->delete();
-        return $this->Simple_action_delete($request); //editable table
+
+        DB::beginTransaction();
+        try {
+            $this->query = DB::table($this->mainTable)->where('id', $id);
+            DB::table('skeleton_setting_template_access')
+                ->where('id_menu_template', $id)
+                ->delete();
+                
+            $result = $this->simpleActionDelete($request);
+            DB::commit();
+            return $result;
+        } catch (Exception $e) {
+            DB::rollback();
+            $this->logger->error($e);
+            return $this->returnResponse('Delete failed: ' . $e->getMessage(), 'response/error_reload_full');
+        }
     }
 
-    public function Create(Request $request)
+    /**
+     * Show create form
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function create(Request $request)
     {
-        if (!$this->acl($this->controller_path)) {
+        if (!$this->acl($this->controllerPath)) {
             abort(401);
         }
-        $data['type'] = 'create';
+
         $menu = new GenerateMenuSidebar();
-        $data['acl'] = $menu->acl_tree();
-        return view($this->view_folder . '.form', $data);
+        return view($this->viewFolder . '.form', [
+            'type' => 'create',
+            'acl' => $menu->aclTree()
+        ]);
     }
 
-    public function Store(Request $request)
+    /**
+     * Store a new record
+     *
+     * @param Request $request
+     * @return Response|\Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
     {
-        if (!$request->ajax() || !$this->acl($this->controller_path)) {
+        if (!$request->ajax() || !$this->acl($this->controllerPath)) {
             abort(401);
         }
+
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:'.$this->main_table.',name',
+            'name' => 'required|unique:' . $this->mainTable . ',name',
             'authorization' => 'required|array',
             'authorization.*' => 'required|exists:skeleton_setting_menu_access,id'
         ]);
@@ -93,49 +185,61 @@ class RoleUsersController extends Codeton
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()]);
         }
-        try {
 
-            $data_insert = array(
-                'name'              => $request->name,
-                'id_user_insert'    => Auth::user()->id,
-                'id_user_update'    => Auth::user()->id,
-                'id_office'           => 1
-            );
+        try {
             DB::beginTransaction();
-            $idRole = DB::table($this->main_table)->insertGetId($data_insert);
-            //insert access
-            DB::table('skeleton_setting_template_access')->where('id_menu_template',$idRole)->delete();
-            $this->insertAccess($idRole,$request->input('authorization'));
-            //log data insert
+            
+            $idRole = DB::table($this->mainTable)->insertGetId([
+                'name' => $request->name,
+                'id_user_insert' => Auth::id(),
+                'id_user_update' => Auth::id(),
+                'id_office' => 1
+            ]);
+
+            $this->insertAccess($idRole, $request->input('authorization'));
+            
             DB::commit();
+            
+            return $this->returnResponse(
+                'Insert Successful',
+                'response/success_reload_full',
+                $request->session()->get($this->controllerPath)
+            );
         } catch (Exception $e) {
             DB::rollback();
-            //log jika error
             $this->logger->error($e);
-            return $this->Return_response('Error insert data'. $e->getMessage(), 'response/error_reload_full');
+            return $this->returnResponse(
+                'Error during insert: ' . $e->getMessage(),
+                'response/error_reload_full'
+            );
         }
-        //log kalau sukses
-        //return $this->Return_response('Insert Successfull','response/success_reload_full',$this->controller_path.'/detail/'.$uuid);
-        return $this->Return_response('Insert Successfull', 'response/success_reload_full', $request->session()->get($this->controller_path));
     }
 
-    private function insertAccess($id_menu_template,$authorization){
-        $data_insert = [];
-        foreach ($authorization as $key => $value) {
-            $data_insert[]=[
+    /**
+     * Insert access rights
+     *
+     * @param int $idMenuTemplate
+     * @param array $authorization
+     * @return void
+     */
+    private function insertAccess(int $idMenuTemplate, array $authorization): void
+    {
+        $dataInsert = array_map(function ($value) use ($idMenuTemplate) {
+            return [
                 'id_menu_access' => $value,
-                'id_menu_template' =>$id_menu_template
+                'id_menu_template' => $idMenuTemplate
             ];
-        }
-        DB::table('skeleton_setting_template_access')->insert($data_insert);
+        }, $authorization);
+
+        DB::table('skeleton_setting_template_access')->insert($dataInsert);
     }
 
     public function Edit(Request $request)
     {
-        if(!$this->acl($this->controller_path)){abort(401);}
+        if(!$this->acl($this->controllerPath)){abort(401);}
         $id = $request->id;
         
-            $data['results'] = DB::table($this->main_table)->where('id','=',$id)->first(); //editable
+            $data['results'] = DB::table($this->mainTable)->where('id','=',$id)->first(); //editable
             // !$data['results'] ? abort(404) : true;
             
             $menu = new GenerateMenuSidebar();
@@ -145,10 +249,10 @@ class RoleUsersController extends Codeton
             $data['type'] = "edit";
 
             //add another datas for edit view
-            return view($this->view_folder.'.form', $data);
+            return view($this->viewFolder.'.form', $data);
         try {
             $id = $request->id;
-            $data['results'] = DB::table($this->main_table)->where('id','=',$id)->first(); //editable
+            $data['results'] = DB::table($this->mainTable)->where('id','=',$id)->first(); //editable
             // !$data['results'] ? abort(404) : true;
             $menu = new GenerateMenuSidebar();
             $selectedAccess = DB::table('skeleton_setting_template_access')->where('id_menu_template',$id)->get();
@@ -156,18 +260,18 @@ class RoleUsersController extends Codeton
             $data['type'] = "edit";
 
             //add another datas for edit view
-            return view($this->view_folder.'.form', $data);
+            return view($this->viewFolder.'.form', $data);
         } catch (Exception $e) {
-            // return redirect($this->controller_path);
+            // return redirect($this->controllerPath);
             dd($e->getMessage());
         }
     }
 
     public function Update(Request $request){
-        if(!$request->ajax() || !$this->acl($this->controller_path)){abort(401);}
+        if(!$request->ajax() || !$this->acl($this->controllerPath)){abort(401);}
         $id = $request->post('id_reference');
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:'.$this->main_table.',name,'.$id.',id',
+            'name' => 'required|unique:'.$this->mainTable.',name,'.$id.',id',
             'authorization' => 'required|array',
             'authorization.*' => 'required|exists:skeleton_setting_menu_access,id'
         ]);
@@ -181,7 +285,7 @@ class RoleUsersController extends Codeton
                 'id_user_update'    => Auth::user()->id,
             );
             DB::beginTransaction();
-            DB::table($this->main_table)->where('id',$id)
+            DB::table($this->mainTable)->where('id',$id)
             // ->where('id_office',1) //dev
             ->update($data_update);
 
@@ -199,7 +303,7 @@ class RoleUsersController extends Codeton
         }
         //log kalau sukses
         //return $this->Return_response('Update Successfull','response/success_reload_full',$this->controller_path.'/detail/'.$id);
-        return $this->Return_response('Update Successfull','response/success_reload_full',$request->session()->get($this->controller_path));
+        return $this->Return_response('Update Successfull','response/success_reload_full',$request->session()->get($this->controllerPath));
     }
 
 }
