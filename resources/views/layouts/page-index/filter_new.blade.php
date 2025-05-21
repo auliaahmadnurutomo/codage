@@ -7,7 +7,7 @@
           @csrf
           @if(!empty($column_search) && isset($column_search))
           <div class="col-sm-4 my-1">
-              <select id="getColumn" class="selectpicker w-100 border rounded" data-placeholder="Kolom yang dicari" name="getColumn" required>
+              <select id="getColumn" class="w-100 border rounded" data-placeholder="Kolom yang dicari" name="getColumn" required>
                   @foreach(@$column_search as $cs => $valCs)
                     <option value= "{{ $cs }}" {{ $cs = @$getColumn ? "selected" : "" }} > {{ $valCs['label'] }}</option>
                   @endforeach
